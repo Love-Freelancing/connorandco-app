@@ -30,6 +30,7 @@ jobs:
       api: ${{ steps.affected.outputs.api }}
       dashboard: ${{ steps.affected.outputs.dashboard }}
       worker: ${{ steps.affected.outputs.worker }}
+      db: ${{ steps.affected.outputs.db }}
       website: ${{ steps.affected.outputs.website }}
       email: ${{ steps.affected.outputs.email }}
       jobs: ${{ steps.affected.outputs.jobs }}
@@ -48,9 +49,48 @@ jobs:
           echo "api=$(echo "$AFFECTED" | grep -q '@connorco/api' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "dashboard=$(echo "$AFFECTED" | grep -q '@connorco/dashboard' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "worker=$(echo "$AFFECTED" | grep -q '@connorco/worker' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "db=$(echo "$AFFECTED" | grep -q '@connorco/db' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "website=$(echo "$AFFECTED" | grep -q '@connorco/website' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "email=$(echo "$AFFECTED" | grep -q '@connorco/email' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "jobs=$(echo "$AFFECTED" | grep -q '@connorco/jobs' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+
+  # ---------------------------------------------------------------------------
+  # Run database migrations (Supabase/Postgres) before backend deploys
+  # ---------------------------------------------------------------------------
+  migrate-db:
+    name: Migrate DB
+    needs: [detect-changes, validate]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      (
+        needs.detect-changes.outputs.db == 'true' ||
+        needs.detect-changes.outputs.api == 'true' ||
+        needs.detect-changes.outputs.dashboard == 'true' ||
+        needs.detect-changes.outputs.worker == 'true' ||
+        needs.detect-changes.outputs.jobs == 'true'
+      )
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 15
+    concurrency: db-migrations-production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Validate database connection secret
+        env:
+          DATABASE_SESSION_POOLER: ${{ secrets.DATABASE_SESSION_POOLER }}
+        run: |
+          if [ -z "$DATABASE_SESSION_POOLER" ]; then
+            echo "Missing required secret: DATABASE_SESSION_POOLER"
+            exit 1
+          fi
+
+      - name: Run Drizzle migrations
+        env:
+          DATABASE_SESSION_POOLER: ${{ secrets.DATABASE_SESSION_POOLER }}
+        run: bunx drizzle-kit migrate --config=packages/db/drizzle.config.ts
 
   # ---------------------------------------------------------------------------
   # Validate — runs in parallel with detect-changes
@@ -86,10 +126,11 @@ jobs:
   # ---------------------------------------------------------------------------
   deploy-api:
     name: Deploy API
-    needs: [detect-changes, validate]
+    needs: [detect-changes, validate, migrate-db]
     if: >-
       always() &&
       needs.validate.result == 'success' &&
+      (needs.migrate-db.result == 'success' || needs.migrate-db.result == 'skipped') &&
       needs.detect-changes.outputs.api == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20
@@ -110,10 +151,11 @@ jobs:
   # ---------------------------------------------------------------------------
   deploy-dashboard:
     name: Deploy Dashboard
-    needs: [detect-changes, validate, deploy-api]
+    needs: [detect-changes, validate, migrate-db, deploy-api]
     if: >-
       always() &&
       needs.validate.result == 'success' &&
+      (needs.migrate-db.result == 'success' || needs.migrate-db.result == 'skipped') &&
       needs.detect-changes.outputs.dashboard == 'true' &&
       (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -135,10 +177,11 @@ jobs:
   # ---------------------------------------------------------------------------
   deploy-worker:
     name: Deploy Worker
-    needs: [detect-changes, validate, deploy-api]
+    needs: [detect-changes, validate, migrate-db, deploy-api]
     if: >-
       always() &&
       needs.validate.result == 'success' &&
+      (needs.migrate-db.result == 'success' || needs.migrate-db.result == 'skipped') &&
       needs.detect-changes.outputs.worker == 'true' &&
       (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -229,10 +272,11 @@ jobs:
   # ---------------------------------------------------------------------------
   deploy-jobs:
     name: Deploy Jobs
-    needs: [detect-changes, validate]
+    needs: [detect-changes, validate, migrate-db]
     if: >-
       always() &&
       needs.validate.result == 'success' &&
+      (needs.migrate-db.result == 'success' || needs.migrate-db.result == 'skipped') &&
       needs.detect-changes.outputs.jobs == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20

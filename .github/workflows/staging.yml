@@ -30,6 +30,7 @@ jobs:
       api: ${{ steps.affected.outputs.api }}
       dashboard: ${{ steps.affected.outputs.dashboard }}
       worker: ${{ steps.affected.outputs.worker }}
+      db: ${{ steps.affected.outputs.db }}
       website: ${{ steps.affected.outputs.website }}
       jobs: ${{ steps.affected.outputs.jobs }}
     steps:
@@ -47,8 +48,47 @@ jobs:
           echo "api=$(echo "$AFFECTED" | grep -q '@connorco/api' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "dashboard=$(echo "$AFFECTED" | grep -q '@connorco/dashboard' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "worker=$(echo "$AFFECTED" | grep -q '@connorco/worker' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "db=$(echo "$AFFECTED" | grep -q '@connorco/db' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "website=$(echo "$AFFECTED" | grep -q '@connorco/website' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "jobs=$(echo "$AFFECTED" | grep -q '@connorco/jobs' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+
+  # ---------------------------------------------------------------------------
+  # Run database migrations (Supabase/Postgres) before backend deploys
+  # ---------------------------------------------------------------------------
+  migrate-db-staging:
+    name: Migrate DB (staging)
+    needs: [detect-changes, validate]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      (
+        needs.detect-changes.outputs.db == 'true' ||
+        needs.detect-changes.outputs.api == 'true' ||
+        needs.detect-changes.outputs.dashboard == 'true' ||
+        needs.detect-changes.outputs.worker == 'true' ||
+        needs.detect-changes.outputs.jobs == 'true'
+      )
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 15
+    concurrency: db-migrations-staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Validate database connection secret
+        env:
+          DATABASE_SESSION_POOLER: ${{ secrets.DATABASE_SESSION_POOLER_STAGING || secrets.DATABASE_SESSION_POOLER }}
+        run: |
+          if [ -z "$DATABASE_SESSION_POOLER" ]; then
+            echo "Missing required secret: DATABASE_SESSION_POOLER_STAGING (or DATABASE_SESSION_POOLER fallback)"
+            exit 1
+          fi
+
+      - name: Run Drizzle migrations
+        env:
+          DATABASE_SESSION_POOLER: ${{ secrets.DATABASE_SESSION_POOLER_STAGING || secrets.DATABASE_SESSION_POOLER }}
+        run: bunx drizzle-kit migrate --config=packages/db/drizzle.config.ts
 
   # ---------------------------------------------------------------------------
   # Validate — runs in parallel with detect-changes
@@ -84,10 +124,11 @@ jobs:
   # ---------------------------------------------------------------------------
   deploy-api-staging:
     name: Deploy API (staging)
-    needs: [detect-changes, validate]
+    needs: [detect-changes, validate, migrate-db-staging]
     if: >-
       always() &&
       needs.validate.result == 'success' &&
+      (needs.migrate-db-staging.result == 'success' || needs.migrate-db-staging.result == 'skipped') &&
       needs.detect-changes.outputs.api == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20
@@ -108,10 +149,11 @@ jobs:
   # ---------------------------------------------------------------------------
   deploy-dashboard-staging:
     name: Deploy Dashboard (staging)
-    needs: [detect-changes, validate, deploy-api-staging]
+    needs: [detect-changes, validate, migrate-db-staging, deploy-api-staging]
     if: >-
       always() &&
       needs.validate.result == 'success' &&
+      (needs.migrate-db-staging.result == 'success' || needs.migrate-db-staging.result == 'skipped') &&
       needs.detect-changes.outputs.dashboard == 'true' &&
       (needs.deploy-api-staging.result == 'success' || needs.deploy-api-staging.result == 'skipped')
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -133,10 +175,11 @@ jobs:
   # ---------------------------------------------------------------------------
   deploy-worker-staging:
     name: Deploy Worker (staging)
-    needs: [detect-changes, validate, deploy-api-staging]
+    needs: [detect-changes, validate, migrate-db-staging, deploy-api-staging]
     if: >-
       always() &&
       needs.validate.result == 'success' &&
+      (needs.migrate-db-staging.result == 'success' || needs.migrate-db-staging.result == 'skipped') &&
       needs.detect-changes.outputs.worker == 'true' &&
       (needs.deploy-api-staging.result == 'success' || needs.deploy-api-staging.result == 'skipped')
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -158,10 +201,11 @@ jobs:
   # ---------------------------------------------------------------------------
   deploy-jobs-staging:
     name: Deploy Jobs (staging)
-    needs: [detect-changes, validate]
+    needs: [detect-changes, validate, migrate-db-staging]
     if: >-
       always() &&
       needs.validate.result == 'success' &&
+      (needs.migrate-db-staging.result == 'success' || needs.migrate-db-staging.result == 'skipped') &&
       needs.detect-changes.outputs.jobs == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20
