@@ -21,8 +21,13 @@ const connectionConfig = {
 };
 
 // Primary pool — DATABASE_PRIMARY_URL should point to the Supabase pooler
+const primaryConnectionString =
+  process.env.DATABASE_PRIMARY_URL ||
+  process.env.DATABASE_SESSION_POOLER ||
+  process.env.DATABASE_URL;
+
 const primaryPool = new Pool({
-  connectionString: process.env.DATABASE_PRIMARY_URL!,
+  connectionString: primaryConnectionString,
   ...connectionConfig,
 });
 
@@ -47,6 +52,7 @@ const currentRegion = process.env.RAILWAY_REPLICA_REGION;
 const replicaUrl = currentRegion
   ? replicaUrlForRegion[currentRegion]
   : undefined;
+const shouldUseReplicaReads = process.env.DATABASE_REPLICA_ENABLED === "true";
 
 if (!isDevelopment) {
   if (!currentRegion) {
@@ -57,11 +63,15 @@ if (!isDevelopment) {
     logger.warn(
       `RAILWAY_REPLICA_REGION="${currentRegion}" but no matching DATABASE_*_URL found — falling back to primary`,
     );
+  } else if (!shouldUseReplicaReads) {
+    logger.warn(
+      "Replica URLs are configured but DATABASE_REPLICA_ENABLED is not true — using primary for all reads",
+    );
   }
 }
 
 // Only create ONE replica pool for the current region, fall back to primary
-const replicaPool = replicaUrl
+const replicaPool = shouldUseReplicaReads && replicaUrl
   ? new Pool({ connectionString: replicaUrl, ...connectionConfig })
   : null;
 
