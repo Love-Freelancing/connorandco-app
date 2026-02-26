@@ -18,28 +18,51 @@ import { z } from "zod";
 
 export const userRouter = createTRPCRouter({
   me: authenticatedProcedure.query(async ({ ctx: { db, session } }) => {
-    // Cookie-based approach handles replication lag for new users via x-force-primary header
-    // Retry logic still handles connection errors/timeouts
-    let result = await withRetryOnPrimary(db, async (dbInstance) =>
-      getUserById(dbInstance, session.user.id),
-    );
+    try {
+      // Cookie-based approach handles replication lag for new users via x-force-primary header
+      // Retry logic still handles connection errors/timeouts
+      let result = await withRetryOnPrimary(db, async (dbInstance) =>
+        getUserById(dbInstance, session.user.id),
+      );
 
-    if (!result) {
-      result = await ensureUserProfile(db, {
-        id: session.user.id,
-        email: session.user.email ?? null,
-        fullName: session.user.full_name ?? null,
+      if (!result) {
+        result = await ensureUserProfile(db, {
+          id: session.user.id,
+          email: session.user.email ?? null,
+          fullName: session.user.full_name ?? null,
+        });
+      }
+
+      if (!result) {
+        return undefined;
+      }
+
+      return {
+        ...result,
+        fileKey: result.teamId ? await generateFileKey(result.teamId) : null,
+      };
+    } catch (error) {
+      console.error("[user.me] Falling back to session profile", {
+        userId: session.user.id,
+        error: error instanceof Error ? error.message : String(error),
       });
-    }
 
-    if (!result) {
-      return undefined;
+      return {
+        id: session.user.id,
+        fullName: session.user.full_name ?? null,
+        email: session.user.email ?? null,
+        avatarUrl: null,
+        locale: "en",
+        timeFormat: 24,
+        dateFormat: null,
+        weekStartsOnMonday: false,
+        timezone: null,
+        timezoneAutoSync: true,
+        teamId: null,
+        team: null,
+        fileKey: null,
+      };
     }
-
-    return {
-      ...result,
-      fileKey: result.teamId ? await generateFileKey(result.teamId) : null,
-    };
   }),
 
   update: authenticatedProcedure

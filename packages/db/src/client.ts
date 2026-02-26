@@ -23,13 +23,39 @@ const connectionConfig = {
 
 // Primary pool — DATABASE_PRIMARY_URL should point to the Supabase pooler
 const primaryConnectionString =
-  process.env.DATABASE_PRIMARY_URL ||
   process.env.DATABASE_SESSION_POOLER ||
+  process.env.DATABASE_PRIMARY_URL ||
   process.env.DATABASE_URL;
+
+const primaryConnectionSource = process.env.DATABASE_SESSION_POOLER
+  ? "DATABASE_SESSION_POOLER"
+  : process.env.DATABASE_PRIMARY_URL
+    ? "DATABASE_PRIMARY_URL"
+    : process.env.DATABASE_URL
+      ? "DATABASE_URL"
+      : "none";
 
 if (!primaryConnectionString) {
   throw new Error(
     "Missing database connection string: set DATABASE_PRIMARY_URL (or DATABASE_SESSION_POOLER/DATABASE_URL)",
+  );
+}
+
+try {
+  const parsed = new URL(primaryConnectionString);
+  logger.info(
+    "Database primary connection configured",
+    {
+      source: primaryConnectionSource,
+      host: parsed.hostname,
+      port: parsed.port || "5432",
+      database: parsed.pathname.replace(/^\//, "") || "postgres",
+    },
+  );
+} catch {
+  logger.warn(
+    "Database connection string is not a valid URL",
+    { source: primaryConnectionSource },
   );
 }
 
