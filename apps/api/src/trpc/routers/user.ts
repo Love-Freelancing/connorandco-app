@@ -6,6 +6,7 @@ import { withRetryOnPrimary } from "@api/utils/db-retry";
 import { teamCache } from "@connorco/cache/team-cache";
 import {
   deleteUser,
+  ensureUserProfile,
   getUserById,
   getUserInvites,
   switchUserTeam,
@@ -19,9 +20,17 @@ export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx: { db, session } }) => {
     // Cookie-based approach handles replication lag for new users via x-force-primary header
     // Retry logic still handles connection errors/timeouts
-    const result = await withRetryOnPrimary(db, async (dbInstance) =>
+    let result = await withRetryOnPrimary(db, async (dbInstance) =>
       getUserById(dbInstance, session.user.id),
     );
+
+    if (!result) {
+      result = await ensureUserProfile(db, {
+        id: session.user.id,
+        email: session.user.email ?? null,
+        fullName: session.user.full_name ?? null,
+      });
+    }
 
     if (!result) {
       return undefined;

@@ -36,6 +36,28 @@ export const getUserById = async (db: Database, id: string) => {
   return result;
 };
 
+export const ensureUserProfile = async (
+  db: Database,
+  params: {
+    id: string;
+    email?: string | null;
+    fullName?: string | null;
+    avatarUrl?: string | null;
+  },
+) => {
+  await db
+    .insert(users)
+    .values({
+      id: params.id,
+      email: params.email ?? null,
+      fullName: params.fullName ?? null,
+      avatarUrl: params.avatarUrl ?? null,
+    })
+    .onConflictDoNothing({ target: users.id });
+
+  return getUserById(db, params.id);
+};
+
 export type UpdateUserParams = {
   id: string;
   fullName?: string | null;

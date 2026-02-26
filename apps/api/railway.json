@@ -8,8 +8,6 @@
     "healthcheckPath": "/health",
     "healthcheckTimeout": 60,
     "restartPolicyType": "ON_FAILURE",
-    "deploymentOverlapSeconds": 30,
-    "drainingSeconds": 15,
     "region": "us-east4-eqdc4a",
     "numReplicas": 1
   },
