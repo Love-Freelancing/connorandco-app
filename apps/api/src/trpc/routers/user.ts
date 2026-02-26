@@ -1,0 +1,100 @@
+import { updateUserSchema } from "@api/schemas/users";
+import { resend } from "@api/services/resend";
+import { createAdminClient } from "@api/services/supabase";
+import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { withRetryOnPrimary } from "@api/utils/db-retry";
+import { teamCache } from "@connorco/cache/team-cache";
+import {
+  deleteUser,
+  getUserById,
+  getUserInvites,
+  switchUserTeam,
+  updateUser,
+} from "@connorco/db/queries";
+import { generateFileKey } from "@connorco/encryption";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+
+export const userRouter = createTRPCRouter({
+  me: protectedProcedure.query(async ({ ctx: { db, session } }) => {
+    // Cookie-based approach handles replication lag for new users via x-force-primary header
+    // Retry logic still handles connection errors/timeouts
+    const result = await withRetryOnPrimary(db, async (dbInstance) =>
+      getUserById(dbInstance, session.user.id),
+    );
+
+    if (!result) {
+      return undefined;
+    }
+
+    return {
+      ...result,
+      fileKey: result.teamId ? await generateFileKey(result.teamId) : null,
+    };
+  }),
+
+  update: protectedProcedure
+    .input(updateUserSchema)
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      return updateUser(db, {
+        id: session.user.id,
+        ...input,
+      });
+    }),
+
+  switchTeam: protectedProcedure
+    .input(z.object({ teamId: z.string().uuid() }))
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      let result: Awaited<ReturnType<typeof switchUserTeam>>;
+
+      try {
+        result = await switchUserTeam(db, {
+          userId: session.user.id,
+          teamId: input.teamId,
+        });
+      } catch {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You are not a member of this team",
+        });
+      }
+
+      try {
+        await Promise.all([
+          result.previousTeamId
+            ? teamCache.delete(
+                `user:${session.user.id}:team:${result.previousTeamId}`,
+              )
+            : Promise.resolve(),
+          teamCache.delete(`user:${session.user.id}:team:${input.teamId}`),
+        ]);
+      } catch {
+        // Non-fatal — cache will expire naturally
+      }
+
+      return result;
+    }),
+
+  delete: protectedProcedure.mutation(async ({ ctx: { db, session } }) => {
+    const supabaseAdmin = await createAdminClient();
+
+    const [data] = await Promise.all([
+      deleteUser(db, session.user.id),
+      supabaseAdmin.auth.admin.deleteUser(session.user.id),
+      resend.contacts.remove({
+        email: session.user.email!,
+        audienceId: process.env.RESEND_AUDIENCE_ID!,
+      }),
+    ]);
+
+    return data;
+  }),
+
+  invites: protectedProcedure.query(async ({ ctx: { db, session } }) => {
+    if (!session.user.email) {
+      return [];
+    }
+
+    return getUserInvites(db, session.user.email);
+  }),
+});

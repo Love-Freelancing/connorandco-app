@@ -1,0 +1,37 @@
+import { getSession } from "@connorco/supabase/cached-queries";
+import { updateBankConnection } from "@connorco/supabase/mutations";
+import { createClient } from "@connorco/supabase/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { getUrl } from "@/utils/environment";
+
+export async function GET(req: NextRequest) {
+  const origin = getUrl();
+  const {
+    data: { session },
+  } = await getSession();
+
+  if (!session) {
+    return NextResponse.redirect(new URL("/", origin));
+  }
+
+  const supabase = await createClient();
+  const requestUrl = new URL(req.url);
+  const id = requestUrl.searchParams.get("id");
+  const referenceId = requestUrl.searchParams.get("reference_id") ?? undefined;
+  const isDesktop = requestUrl.searchParams.get("desktop");
+
+  if (id) {
+    await updateBankConnection(supabase, { id, referenceId });
+  }
+
+  if (isDesktop === "true") {
+    const scheme = process.env.NEXT_PUBLIC_DESKTOP_SCHEME || "connorandco-app";
+    return NextResponse.redirect(
+      `${scheme}://settings/accounts?id=${id}&step=reconnect`,
+    );
+  }
+
+  return NextResponse.redirect(
+    `${origin}/settings/accounts?id=${id}&step=reconnect`,
+  );
+}

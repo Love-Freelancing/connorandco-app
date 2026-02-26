@@ -1,0 +1,20 @@
+{
+  "name": "@connorco/health",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./checker": "./src/checker.ts",
+    "./probes": "./src/probes.ts",
+    "./registry": "./src/registry.ts"
+  },
+  "dependencies": {
+    "@connorco/banking": "workspace:*",
+    "@connorco/cache": "workspace:*",
+    "@connorco/db": "workspace:*"
+  }
+}
