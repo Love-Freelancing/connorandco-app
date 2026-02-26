@@ -2,6 +2,12 @@ import { createServerClient } from "@supabase/ssr";
 import type { NextRequest, NextResponse } from "next/server";
 import { normalizeSupabaseUrl } from "./normalize-url";
 
+function hasSupabaseAuthCookie(request: NextRequest) {
+  return request.cookies
+    .getAll()
+    .some((cookie) => cookie.name.includes("-auth-token"));
+}
+
 export async function updateSession(
   request: NextRequest,
   response: NextResponse,
@@ -32,10 +38,14 @@ export async function updateSession(
   // updated auth cookies back to the response.
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
+
+  const cookieSession = hasSupabaseAuthCookie(request);
+  const hasSession = Boolean(user) || (cookieSession && Boolean(error));
 
   return {
     response,
-    hasSession: Boolean(user),
+    hasSession,
   };
 }
