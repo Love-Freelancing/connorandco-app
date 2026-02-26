@@ -8,8 +8,12 @@ export function normalizeSupabaseUrl(value: string | null | undefined): string {
     return "";
   }
 
+  const withProtocol = /^https?:\/\//i.test(rawUrl)
+    ? rawUrl
+    : `https://${rawUrl}`;
+
   try {
-    const parsed = new URL(rawUrl);
+    const parsed = new URL(withProtocol);
 
     if (parsed.hostname === LOCAL_SUPABASE_HOST) {
       parsed.hostname = "127.0.0.1";
@@ -21,8 +25,8 @@ export function normalizeSupabaseUrl(value: string | null | undefined): string {
       return parsed.toString().replace(/\/$/, "");
     }
 
-    return rawUrl;
+    return withProtocol;
   } catch {
-    return rawUrl;
+    return withProtocol;
   }
 }
