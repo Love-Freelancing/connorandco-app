@@ -9,7 +9,7 @@ import fortnoxApp from "./fortnox/config-client";
 import gmailApp from "./gmail/config-client";
 import googleDriveApp from "./google-drive/config";
 import makeMcpApp from "./make-mcp/config";
-import connorcoDesktopApp from "./connorandco-desktop/config";
+import connorcoDesktopApp from "./midday-desktop/config";
 import n8nMcpApp from "./n8n-mcp/config";
 import opencodeMcpApp from "./opencode-mcp/config";
 import outlookApp from "./outlook/config-client";
