@@ -32,58 +32,80 @@ export async function GET(req: NextRequest) {
   if (code) {
     try {
       const supabase = await createClient();
-      await supabase.auth.exchangeCodeForSession(code);
+      const { error: exchangeError } =
+        await supabase.auth.exchangeCodeForSession(code);
+
+      if (exchangeError) {
+        console.error("[auth-callback] exchangeCodeForSession failed", {
+          error: exchangeError.message,
+        });
+        return NextResponse.redirect(
+          `${origin}/login?auth_error=exchange_failed`,
+        );
+      }
 
       const {
         data: { session },
+        error: sessionError,
       } = await getSession();
 
-      if (session) {
-        // Set cookie to force primary database reads for subsequent client-side
-        // requests after redirect. This prevents replication lag issues when the
-        // user record hasn't replicated to read replicas yet.
-        cookieStore.set(Cookies.ForcePrimary, "true", {
-          expires: addSeconds(new Date(), 30),
-          httpOnly: false, // Needs to be readable by client-side tRPC
-          sameSite: "lax",
+      if (sessionError) {
+        console.error("[auth-callback] getSession failed", {
+          error: sessionError.message,
         });
+        return NextResponse.redirect(`${origin}/login?auth_error=session_error`);
+      }
 
-        // If user is redirected from an invite, redirect to teams page to accept/decline the invite
-        if (returnTo?.startsWith("teams/invite/")) {
-          const analytics = await setupAnalytics();
-          analytics.track({
-            event: LogEvents.SignIn.name,
-            channel: LogEvents.SignIn.channel,
-            provider: provider ?? "unknown",
-            destination: "teams",
-          });
+      if (!session) {
+        console.error("[auth-callback] No session after exchange");
+        return NextResponse.redirect(`${origin}/login?auth_error=no_session`);
+      }
 
-          return NextResponse.redirect(`${origin}/teams`);
-        }
+      // Set cookie to force primary database reads for subsequent client-side
+      // requests after redirect. This prevents replication lag issues when the
+      // user record hasn't replicated to read replicas yet.
+      cookieStore.set(Cookies.ForcePrimary, "true", {
+        expires: addSeconds(new Date(), 30),
+        httpOnly: false, // Needs to be readable by client-side tRPC
+        sameSite: "lax",
+      });
 
-        // Explicitly force primary reads for this query -- the user may have
-        // just been created and not yet replicated to read replicas.
-        const trpcClient = await getTRPCClient({ forcePrimary: true });
-        const user = await trpcClient.user.me.query();
-
-        const isOnboarding = !user?.fullName || !user.teamId;
+      // If user is redirected from an invite, redirect to teams page to accept/decline the invite
+      if (returnTo?.startsWith("teams/invite/")) {
         const analytics = await setupAnalytics();
-
         analytics.track({
           event: LogEvents.SignIn.name,
           channel: LogEvents.SignIn.channel,
           provider: provider ?? "unknown",
-          destination: isOnboarding ? "onboarding" : "dashboard",
+          destination: "teams",
         });
 
-        if (isOnboarding) {
-          return NextResponse.redirect(`${origin}/onboarding`);
-        }
+        return NextResponse.redirect(`${origin}/teams`);
+      }
+
+      // Explicitly force primary reads for this query -- the user may have
+      // just been created and not yet replicated to read replicas.
+      const trpcClient = await getTRPCClient({ forcePrimary: true });
+      const user = await trpcClient.user.me.query();
+
+      const isOnboarding = !user?.fullName || !user.teamId;
+      const analytics = await setupAnalytics();
+
+      analytics.track({
+        event: LogEvents.SignIn.name,
+        channel: LogEvents.SignIn.channel,
+        provider: provider ?? "unknown",
+        destination: isOnboarding ? "onboarding" : "dashboard",
+      });
+
+      if (isOnboarding) {
+        return NextResponse.redirect(`${origin}/onboarding`);
       }
     } catch (error) {
       console.error("[auth-callback] Failed to complete sign-in flow", {
         error: error instanceof Error ? error.message : String(error),
       });
+      return NextResponse.redirect(`${origin}/login?auth_error=callback_failed`);
     }
   }
 
