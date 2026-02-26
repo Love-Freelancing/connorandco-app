@@ -1,7 +1,7 @@
 import { updateUserSchema } from "@api/schemas/users";
 import { resend } from "@api/services/resend";
 import { createAdminClient } from "@api/services/supabase";
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { authenticatedProcedure, createTRPCRouter } from "@api/trpc/init";
 import { withRetryOnPrimary } from "@api/utils/db-retry";
 import { teamCache } from "@connorco/cache/team-cache";
 import {
@@ -17,7 +17,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const userRouter = createTRPCRouter({
-  me: protectedProcedure.query(async ({ ctx: { db, session } }) => {
+  me: authenticatedProcedure.query(async ({ ctx: { db, session } }) => {
     // Cookie-based approach handles replication lag for new users via x-force-primary header
     // Retry logic still handles connection errors/timeouts
     let result = await withRetryOnPrimary(db, async (dbInstance) =>
@@ -42,7 +42,7 @@ export const userRouter = createTRPCRouter({
     };
   }),
 
-  update: protectedProcedure
+  update: authenticatedProcedure
     .input(updateUserSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
       return updateUser(db, {
@@ -51,7 +51,7 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
-  switchTeam: protectedProcedure
+  switchTeam: authenticatedProcedure
     .input(z.object({ teamId: z.string().uuid() }))
     .mutation(async ({ ctx: { db, session }, input }) => {
       let result: Awaited<ReturnType<typeof switchUserTeam>>;
@@ -84,7 +84,7 @@ export const userRouter = createTRPCRouter({
       return result;
     }),
 
-  delete: protectedProcedure.mutation(async ({ ctx: { db, session } }) => {
+  delete: authenticatedProcedure.mutation(async ({ ctx: { db, session } }) => {
     const supabaseAdmin = await createAdminClient();
 
     const [data] = await Promise.all([
@@ -99,7 +99,7 @@ export const userRouter = createTRPCRouter({
     return data;
   }),
 
-  invites: protectedProcedure.query(async ({ ctx: { db, session } }) => {
+  invites: authenticatedProcedure.query(async ({ ctx: { db, session } }) => {
     if (!session.user.email) {
       return [];
     }

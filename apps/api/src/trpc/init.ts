@@ -78,6 +78,23 @@ const withTeamPermissionMiddleware = t.middleware(async (opts) => {
 
 export const publicProcedure = t.procedure.use(withPrimaryDbMiddleware);
 
+export const authenticatedProcedure = t.procedure
+  .use(withPrimaryDbMiddleware)
+  .use(async (opts) => {
+    const { session } = opts.ctx;
+
+    if (!session) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return opts.next({
+      ctx: {
+        ...opts.ctx,
+        session,
+      },
+    });
+  });
+
 export const protectedProcedure = t.procedure
   .use(withTeamPermissionMiddleware) // NOTE: This is needed to ensure that the teamId is set in the context
   .use(withPrimaryDbMiddleware)
