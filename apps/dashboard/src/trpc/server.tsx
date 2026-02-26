@@ -21,8 +21,21 @@ export const getQueryClient = cache(makeQueryClient);
 
 // Server-side: prefer Railway private networking (skips DNS + TLS + Cloudflare)
 // Falls back to public URL for local dev / non-Railway environments
-const API_BASE_URL =
-  process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL;
+function normalizeApiBaseUrl(url?: string) {
+  if (!url) return url;
+
+  const trimmed = url.trim().replace(/\/+$/, "");
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  return `https://${trimmed}`;
+}
+
+const API_BASE_URL = normalizeApiBaseUrl(
+  process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL,
+);
 
 const getServerRequestContext = cache(async () => {
   const [supabase, cookieStore, headersList] = await Promise.all([
