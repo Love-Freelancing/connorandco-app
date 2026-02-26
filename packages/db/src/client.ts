@@ -18,6 +18,7 @@ const connectionConfig = {
   maxUses: isDevelopment ? 100 : 0,
   allowExitOnIdle: true,
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
+  options: "-c search_path=public",
 };
 
 // Primary pool — DATABASE_PRIMARY_URL should point to the Supabase pooler
@@ -25,6 +26,12 @@ const primaryConnectionString =
   process.env.DATABASE_PRIMARY_URL ||
   process.env.DATABASE_SESSION_POOLER ||
   process.env.DATABASE_URL;
+
+if (!primaryConnectionString) {
+  throw new Error(
+    "Missing database connection string: set DATABASE_PRIMARY_URL (or DATABASE_SESSION_POOLER/DATABASE_URL)",
+  );
+}
 
 const primaryPool = new Pool({
   connectionString: primaryConnectionString,
