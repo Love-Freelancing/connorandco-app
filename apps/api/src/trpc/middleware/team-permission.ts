@@ -32,23 +32,58 @@ export const withTeamPermission = async <TReturn>(opts: {
   // Try replica first (fast path), fallback to primary on failure
   // This preserves the benefit of fast replicas while handling replication lag gracefully
   // retryOnNull: true ensures we check primary if replica returns null (replication lag)
-  const result = await withRetryOnPrimary(
-    ctx.db,
-    async (db) => {
-      return await db.query.users.findFirst({
-        with: {
-          usersOnTeams: {
-            columns: {
-              id: true,
-              teamId: true,
+  let result: {
+    id: string;
+    teamId: string | null;
+    usersOnTeams: { id: string; teamId: string }[];
+  } | null = null;
+
+  try {
+    result =
+      (await withRetryOnPrimary(
+      ctx.db,
+      async (db) => {
+        return await db.query.users.findFirst({
+          with: {
+            usersOnTeams: {
+              columns: {
+                id: true,
+                teamId: true,
+              },
             },
           },
-        },
-        where: (users, { eq }) => eq(users.id, userId),
-      });
-    },
-    { retryOnNull: true },
-  );
+          where: (users, { eq }) => eq(users.id, userId),
+        });
+      },
+      { retryOnNull: true },
+    )) ?? null;
+  } catch (error) {
+    console.error("[team-permission] Failed relation query, using fallback", {
+      error: error instanceof Error ? error.message : String(error),
+      userId,
+    });
+
+    const fallbackUser = await withRetryOnPrimary(
+      ctx.db,
+      async (db) => {
+        return await db.query.users.findFirst({
+          columns: {
+            id: true,
+            teamId: true,
+          },
+          where: (users, { eq }) => eq(users.id, userId),
+        });
+      },
+      { retryOnNull: true },
+    );
+
+    result = fallbackUser
+      ? {
+          ...fallbackUser,
+          usersOnTeams: [],
+        }
+      : null;
+  }
 
   if (!result) {
     throw new TRPCError({

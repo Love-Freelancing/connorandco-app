@@ -232,6 +232,13 @@
       "when": 1760882469733,
       "tag": "0032_add_customer_portal_billing_type",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1760890200000,
+      "tag": "0033_fix_auth_user_bootstrap",
+      "breakpoints": true
     }
   ]
 }
