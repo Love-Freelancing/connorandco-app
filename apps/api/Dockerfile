@@ -9,6 +9,7 @@ RUN bun add -g turbo
 FROM turbo-cli AS builder
 WORKDIR /app
 COPY . .
+RUN [ -f .git-commit-sha ] || echo "" > .git-commit-sha
 RUN turbo prune @connorco/api --docker
 
 # Installer stage - install deps and build
