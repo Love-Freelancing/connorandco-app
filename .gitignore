@@ -57,6 +57,9 @@ tailwind.css
 .branches
 .temp
 
+# Encrypted secrets workflow
+ops/secrets/services.yaml
+
 # Trigger
 .trigger
 

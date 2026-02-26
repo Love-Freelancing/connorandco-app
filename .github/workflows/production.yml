@@ -138,6 +138,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install SOPS
+        if: ${{ secrets.SOPS_AGE_KEY != '' }}
+        uses: getsops/install-sops@v1
+
+      - name: Sync Railway env (api)
+        if: ${{ secrets.SOPS_AGE_KEY != '' }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: bash scripts/sync-railway-env-from-sops.sh api default
+
       - name: Stamp git SHA for Docker build
         run: echo "${{ github.sha }}" > .git-commit-sha
 
@@ -164,6 +175,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install SOPS
+        if: ${{ secrets.SOPS_AGE_KEY != '' }}
+        uses: getsops/install-sops@v1
+
+      - name: Sync Railway env (dashboard)
+        if: ${{ secrets.SOPS_AGE_KEY != '' }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: bash scripts/sync-railway-env-from-sops.sh dashboard default
+
       - name: Stamp git SHA for Docker build
         run: echo "${{ github.sha }}" > .git-commit-sha
 
@@ -189,6 +211,17 @@ jobs:
     concurrency: railway-worker-production
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install SOPS
+        if: ${{ secrets.SOPS_AGE_KEY != '' }}
+        uses: getsops/install-sops@v1
+
+      - name: Sync Railway env (worker)
+        if: ${{ secrets.SOPS_AGE_KEY != '' }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: bash scripts/sync-railway-env-from-sops.sh worker default
 
       - name: Stamp git SHA for Docker build
         run: echo "${{ github.sha }}" > .git-commit-sha
