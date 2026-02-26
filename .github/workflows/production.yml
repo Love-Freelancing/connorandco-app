@@ -133,6 +133,7 @@ jobs:
       (needs.migrate-db.result == 'success' || needs.migrate-db.result == 'skipped') &&
       needs.detect-changes.outputs.api == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    environment: production
     timeout-minutes: 20
     concurrency: railway-api-production
     steps:
@@ -170,6 +171,7 @@ jobs:
       needs.detect-changes.outputs.dashboard == 'true' &&
       (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    environment: production
     timeout-minutes: 20
     concurrency: railway-dashboard-production
     steps:
@@ -207,6 +209,7 @@ jobs:
       needs.detect-changes.outputs.worker == 'true' &&
       (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    environment: production
     timeout-minutes: 20
     concurrency: railway-worker-production
     steps:

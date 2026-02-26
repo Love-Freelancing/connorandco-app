@@ -131,6 +131,7 @@ jobs:
       (needs.migrate-db-staging.result == 'success' || needs.migrate-db-staging.result == 'skipped') &&
       needs.detect-changes.outputs.api == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    environment: staging
     timeout-minutes: 20
     concurrency: railway-api-staging
     steps:
@@ -168,6 +169,7 @@ jobs:
       needs.detect-changes.outputs.dashboard == 'true' &&
       (needs.deploy-api-staging.result == 'success' || needs.deploy-api-staging.result == 'skipped')
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    environment: staging
     timeout-minutes: 20
     concurrency: railway-dashboard-staging
     steps:
@@ -205,6 +207,7 @@ jobs:
       needs.detect-changes.outputs.worker == 'true' &&
       (needs.deploy-api-staging.result == 'success' || needs.deploy-api-staging.result == 'skipped')
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    environment: staging
     timeout-minutes: 20
     concurrency: railway-worker-staging
     steps:
