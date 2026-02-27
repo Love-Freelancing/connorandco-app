@@ -113,16 +113,26 @@ function clearPortalSessionExpiry(portalId: string) {
   localStorage.removeItem(getPortalSessionKey(portalId));
 }
 
-function hasValidPortalSession(portalId: string) {
+function getPortalSessionExpiry(portalId: string): number | null {
   if (typeof window === "undefined") return false;
 
   const expiresAtRaw = localStorage.getItem(getPortalSessionKey(portalId));
-  if (!expiresAtRaw) return false;
+  if (!expiresAtRaw) return null;
 
   const expiresAt = Number.parseInt(expiresAtRaw, 10);
-  if (!Number.isFinite(expiresAt)) return false;
+  if (!Number.isFinite(expiresAt)) return null;
 
-  return expiresAt > Date.now();
+  return expiresAt;
+}
+
+function hasExpiredPortalSession(portalId: string) {
+  const expiresAt = getPortalSessionExpiry(portalId);
+
+  if (expiresAt === null) {
+    return false;
+  }
+
+  return expiresAt <= Date.now();
 }
 
 const REQUEST_COLUMNS: Array<{
@@ -368,7 +378,7 @@ export function PortalContent({ portalId }: Props) {
         return;
       }
 
-      if (!hasValidPortalSession(portalId)) {
+      if (hasExpiredPortalSession(portalId)) {
         clearPortalSessionExpiry(portalId);
         await supabase.auth.signOut();
         setSignedInEmail(null);

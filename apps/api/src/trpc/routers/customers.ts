@@ -900,14 +900,13 @@ export const customersRouter = createTRPCRouter({
         });
       }
 
-      const portalPath = `/client/${input.portalId}`;
-      const portalConfirmUrl = `${dashboardUrl}/api/auth/confirm?return_to=${encodeURIComponent(portalPath)}`;
+      const portalUrl = `${dashboardUrl}/client/${input.portalId}`;
       const supabaseAdmin = await createAdminClient();
       const { data, error } = await supabaseAdmin.auth.admin.generateLink({
         type: "magiclink",
         email: providedEmail,
         options: {
-          redirectTo: portalConfirmUrl,
+          redirectTo: portalUrl,
         },
       });
 
