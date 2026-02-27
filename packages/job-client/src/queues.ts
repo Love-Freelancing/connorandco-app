@@ -12,16 +12,50 @@ const logger = createLoggerWithContext("job-client");
  * BullMQ will create and manage its own Redis connection
  */
 function getConnectionOptions() {
-  const redisUrl = process.env.REDIS_QUEUE_URL;
-
-  if (!redisUrl) {
-    throw new Error("REDIS_QUEUE_URL environment variable is required");
-  }
-
-  const url = new URL(redisUrl);
   const isProduction =
     process.env.NODE_ENV === "production" ||
     process.env.RAILWAY_ENVIRONMENT === "production";
+
+  const queueRedisUrl = process.env.REDIS_QUEUE_URL;
+  const defaultRedisUrl = process.env.REDIS_URL;
+
+  const isLocalhostUrl = (value?: string) => {
+    if (!value) return false;
+
+    try {
+      const parsed = new URL(value);
+      return (
+        parsed.hostname === "localhost" ||
+        parsed.hostname === "127.0.0.1" ||
+        parsed.hostname === "::1"
+      );
+    } catch {
+      return false;
+    }
+  };
+
+  let redisUrl = queueRedisUrl || defaultRedisUrl;
+
+  if (!redisUrl) {
+    throw new Error(
+      "REDIS_QUEUE_URL (or REDIS_URL) environment variable is required",
+    );
+  }
+
+  if (isProduction && isLocalhostUrl(redisUrl)) {
+    if (defaultRedisUrl && !isLocalhostUrl(defaultRedisUrl)) {
+      logger.warn("REDIS_QUEUE_URL points to localhost in production, falling back to REDIS_URL", {
+        queueRedisUrl,
+      });
+      redisUrl = defaultRedisUrl;
+    } else {
+      throw new Error(
+        "Invalid Redis configuration: REDIS_QUEUE_URL points to localhost in production",
+      );
+    }
+  }
+
+  const url = new URL(redisUrl);
 
   return {
     host: url.hostname,
