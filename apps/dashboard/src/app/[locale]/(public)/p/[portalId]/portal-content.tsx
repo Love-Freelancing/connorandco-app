@@ -347,6 +347,10 @@ export function PortalContent({ portalId }: Props) {
     }),
   );
 
+  const verifyPortalLoginCodeMutation = useMutation(
+    trpc.customers.verifyPortalLoginCode.mutationOptions(),
+  );
+
   useEffect(() => {
     let isMounted = true;
 
@@ -588,17 +592,17 @@ export function PortalContent({ portalId }: Props) {
     setAuthError(null);
 
     try {
-      const { error } = await supabase.auth.verifyOtp({
+      const result = await verifyPortalLoginCodeMutation.mutateAsync({
+        portalId,
         email: pendingVerificationEmail,
-        token: otpCode,
-        type: "email",
+        code: otpCode,
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (!result?.actionLink) {
+        throw new Error("Unable to complete sign-in right now");
       }
 
-      await verifyPortalAccessMutation.mutateAsync({ portalId });
+      window.location.assign(result.actionLink);
     } catch (error) {
       setAuthError(
         error instanceof Error ? error.message : "Invalid or expired code",
@@ -898,14 +902,19 @@ export function PortalContent({ portalId }: Props) {
               </form>
 
               {codeSentTo ? (
-                <p className="mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 size={16} className="text-emerald-500" />
-                  Check your email. We sent a 6-digit code to{" "}
-                  <span className="font-medium text-foreground">
-                    {codeSentTo}
-                  </span>
-                  .
-                </p>
+                <div className="mt-3 space-y-1">
+                  <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 size={16} className="text-emerald-500" />
+                    Check your email. We sent a 6-digit code to{" "}
+                    <span className="font-medium text-foreground">
+                      {codeSentTo}
+                    </span>
+                    .
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Code expires in 15 minutes.
+                  </p>
+                </div>
               ) : null}
 
               {pendingVerificationEmail ? (
@@ -932,11 +941,11 @@ export function PortalContent({ portalId }: Props) {
                     disabled={
                       otpCode.length !== 6 ||
                       isVerifyingCode ||
-                      verifyPortalAccessMutation.isPending
+                      verifyPortalLoginCodeMutation.isPending
                     }
                     className="h-11 shrink-0 whitespace-nowrap rounded-full px-5"
                   >
-                    {isVerifyingCode || verifyPortalAccessMutation.isPending ? (
+                    {isVerifyingCode || verifyPortalLoginCodeMutation.isPending ? (
                       <span className="inline-flex items-center gap-2">
                         <Spinner size={14} />
                         Verifying

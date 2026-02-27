@@ -76,6 +76,12 @@ export const PortalLoginLinkEmail = ({
             >
               {otpCode}
             </Text>
+            <Text
+              className={`mt-[10px] text-[12px] leading-[20px] ${themeClasses.mutedText}`}
+              style={{ color: lightStyles.mutedText.color }}
+            >
+              This code expires in 15 minutes.
+            </Text>
           </Section>
 
           <Section>

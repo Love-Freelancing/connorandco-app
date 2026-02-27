@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import {
   createCustomerPortalMessageSchema,
   createCustomerSubscriptionCheckoutSchema,
@@ -23,8 +23,10 @@ import {
   toggleCustomerPortalSchema,
   updateCustomerPortalRequestSchema,
   upsertCustomerSchema,
+  verifyPortalLoginCodeSchema,
   verifyPortalAccessSchema,
 } from "@api/schemas/customers";
+import { portalLoginCodeCache } from "@connorco/cache/portal-login-code-cache";
 import { resend } from "@api/services/resend";
 import { createAdminClient } from "@api/services/supabase";
 import {
@@ -119,6 +121,10 @@ const CUSTOMER_OFFER_CATALOG: Record<
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
+}
+
+function generateSixDigitCode() {
+  return randomInt(0, 1_000_000).toString().padStart(6, "0");
 }
 
 function sanitizePortalFileName(fileName: string) {
@@ -801,9 +807,9 @@ export const customersRouter = createTRPCRouter({
         },
       });
 
-      const emailOtp = data.properties?.email_otp;
+      const actionLink = data.properties?.action_link;
 
-      if (error || !emailOtp) {
+      if (error || !actionLink) {
         logger.error("customers.sendPortalLoginLink failed to generate link", {
           customerId: customer.id,
           teamId: customer.teamId,
@@ -812,16 +818,22 @@ export const customersRouter = createTRPCRouter({
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Unable to send sign-in link right now",
+          message: "Unable to send sign-in code right now",
         });
       }
+
+      const code = generateSixDigitCode();
+      await portalLoginCodeCache.set(input.portalId, providedEmail, {
+        code,
+        actionLink,
+      });
 
       const html = await render(
         PortalLoginLinkEmail({
           email: providedEmail,
           teamName: customer.team.name ?? "Connor & Co",
           customerName: customer.name ?? "there",
-          otpCode: emailOtp,
+          otpCode: code,
         }),
       );
       await resend.emails.send({
@@ -832,6 +844,48 @@ export const customersRouter = createTRPCRouter({
       });
 
       return { sent: true };
+    }),
+
+  verifyPortalLoginCode: publicProcedure
+    .input(verifyPortalLoginCodeSchema)
+    .mutation(async ({ ctx: { db }, input }) => {
+      const customer = await getCustomerByPortalId(db, {
+        portalId: input.portalId,
+      });
+
+      if (!customer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer portal not found",
+        });
+      }
+
+      const customerEmail = customer.email
+        ? normalizeEmail(customer.email)
+        : "";
+      const providedEmail = normalizeEmail(input.email);
+
+      if (!customerEmail || customerEmail !== providedEmail) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Email does not match the customer email on file",
+        });
+      }
+
+      const cached = await portalLoginCodeCache.get(input.portalId, providedEmail);
+
+      if (!cached || cached.code !== input.code) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Invalid or expired verification code",
+        });
+      }
+
+      await portalLoginCodeCache.delete(input.portalId, providedEmail);
+
+      return {
+        actionLink: cached.actionLink,
+      };
     }),
 
   verifyPortalAccess: publicProcedure
