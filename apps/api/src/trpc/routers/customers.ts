@@ -1,4 +1,4 @@
-import { randomInt, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import {
   createCustomerPortalMessageSchema,
   createCustomerSubscriptionCheckoutSchema,
@@ -23,10 +23,8 @@ import {
   toggleCustomerPortalSchema,
   updateCustomerPortalRequestSchema,
   upsertCustomerSchema,
-  verifyPortalLoginCodeSchema,
   verifyPortalAccessSchema,
 } from "@api/schemas/customers";
-import { portalLoginCodeCache } from "@connorco/cache/portal-login-code-cache";
 import { resend } from "@api/services/resend";
 import { createAdminClient } from "@api/services/supabase";
 import {
@@ -121,10 +119,6 @@ const CUSTOMER_OFFER_CATALOG: Record<
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
-}
-
-function generateSixDigitCode() {
-  return randomInt(0, 1_000_000).toString().padStart(6, "0");
 }
 
 function sanitizePortalFileName(fileName: string) {
@@ -807,9 +801,9 @@ export const customersRouter = createTRPCRouter({
         },
       });
 
-      const actionLink = data.properties?.action_link;
+      const emailOtp = data.properties?.email_otp;
 
-      if (error || !actionLink) {
+      if (error || !emailOtp) {
         logger.error("customers.sendPortalLoginLink failed to generate link", {
           customerId: customer.id,
           teamId: customer.teamId,
@@ -822,37 +816,12 @@ export const customersRouter = createTRPCRouter({
         });
       }
 
-      const code = generateSixDigitCode();
-      await portalLoginCodeCache.set(input.portalId, providedEmail, {
-        code,
-        actionLink,
-      });
-
-      const persistedCode = await portalLoginCodeCache.get(
-        input.portalId,
-        providedEmail,
-      );
-
-      if (!persistedCode || persistedCode.code !== code) {
-        logger.error("customers.sendPortalLoginLink failed to persist code", {
-          customerId: customer.id,
-          teamId: customer.teamId,
-          portalId: input.portalId,
-        });
-
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message:
-            "Sign-in codes are temporarily unavailable. Please try again.",
-        });
-      }
-
       const html = await render(
         PortalLoginLinkEmail({
           email: providedEmail,
           teamName: customer.team.name ?? "Connor & Co",
           customerName: customer.name ?? "there",
-          otpCode: code,
+          otpCode: emailOtp,
         }),
       );
       await resend.emails.send({
@@ -863,48 +832,6 @@ export const customersRouter = createTRPCRouter({
       });
 
       return { sent: true };
-    }),
-
-  verifyPortalLoginCode: publicProcedure
-    .input(verifyPortalLoginCodeSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
-      const customer = await getCustomerByPortalId(db, {
-        portalId: input.portalId,
-      });
-
-      if (!customer) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Customer portal not found",
-        });
-      }
-
-      const customerEmail = customer.email
-        ? normalizeEmail(customer.email)
-        : "";
-      const providedEmail = normalizeEmail(input.email);
-
-      if (!customerEmail || customerEmail !== providedEmail) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Email does not match the customer email on file",
-        });
-      }
-
-      const cached = await portalLoginCodeCache.get(input.portalId, providedEmail);
-
-      if (!cached || cached.code !== input.code) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invalid or expired verification code",
-        });
-      }
-
-      await portalLoginCodeCache.delete(input.portalId, providedEmail);
-
-      return {
-        actionLink: cached.actionLink,
-      };
     }),
 
   verifyPortalAccess: publicProcedure

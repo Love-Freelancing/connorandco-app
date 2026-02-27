@@ -564,21 +564,6 @@ export const sendPortalLoginLinkSchema = z.object({
   }),
 });
 
-export const verifyPortalLoginCodeSchema = z.object({
-  portalId: z.string().openapi({
-    description: "Short ID for the customer portal URL",
-    example: "X7kM9nPq",
-  }),
-  email: z.string().email().openapi({
-    description: "Customer email on file used for portal sign in",
-    example: "contact@acme.com",
-  }),
-  code: z.string().regex(/^\d{6}$/).openapi({
-    description: "6-digit verification code",
-    example: "123456",
-  }),
-});
-
 const portalAccessSchema = z.object({
   portalId: z.string().openapi({
     description: "Short ID for the customer portal URL",

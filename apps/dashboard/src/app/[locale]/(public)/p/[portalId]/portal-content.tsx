@@ -347,10 +347,6 @@ export function PortalContent({ portalId }: Props) {
     }),
   );
 
-  const verifyPortalLoginCodeMutation = useMutation(
-    trpc.customers.verifyPortalLoginCode.mutationOptions(),
-  );
-
   useEffect(() => {
     let isMounted = true;
 
@@ -581,7 +577,7 @@ export function PortalContent({ portalId }: Props) {
 
     if (
       !pendingVerificationEmail ||
-      otpCode.length !== 6 ||
+      otpCode.length !== 8 ||
       isVerifyingCode ||
       verifyPortalAccessMutation.isPending
     ) {
@@ -592,17 +588,17 @@ export function PortalContent({ portalId }: Props) {
     setAuthError(null);
 
     try {
-      const result = await verifyPortalLoginCodeMutation.mutateAsync({
-        portalId,
+      const { error } = await supabase.auth.verifyOtp({
         email: pendingVerificationEmail,
-        code: otpCode,
+        token: otpCode,
+        type: "email",
       });
 
-      if (!result?.actionLink) {
-        throw new Error("Unable to complete sign-in right now");
+      if (error) {
+        throw new Error(error.message);
       }
 
-      window.location.assign(result.actionLink);
+      await verifyPortalAccessMutation.mutateAsync({ portalId });
     } catch (error) {
       setAuthError(
         error instanceof Error ? error.message : "Invalid or expired code",
@@ -865,7 +861,7 @@ export function PortalContent({ portalId }: Props) {
                 Welcome to your client portal
               </h2>
               <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
-                Enter your email to receive a 6-digit sign-in code.
+                Enter your email to receive an 8-digit sign-in code.
               </p>
 
               <form
@@ -905,7 +901,7 @@ export function PortalContent({ portalId }: Props) {
                 <div className="mt-3 space-y-1">
                   <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                     <CheckCircle2 size={16} className="text-emerald-500" />
-                    Check your email. We sent a 6-digit code to{" "}
+                    Check your email. We sent an 8-digit code to{" "}
                     <span className="font-medium text-foreground">
                       {codeSentTo}
                     </span>
@@ -923,7 +919,7 @@ export function PortalContent({ portalId }: Props) {
                   className="mx-auto mt-4 flex w-full max-w-3xl flex-col items-center gap-3"
                 >
                   <InputOTP
-                    maxLength={6}
+                    maxLength={8}
                     value={otpCode}
                     onChange={setOtpCode}
                     disabled={isVerifyingCode || verifyPortalAccessMutation.isPending}
@@ -939,13 +935,13 @@ export function PortalContent({ portalId }: Props) {
                   <Button
                     type="submit"
                     disabled={
-                      otpCode.length !== 6 ||
+                      otpCode.length !== 8 ||
                       isVerifyingCode ||
-                      verifyPortalLoginCodeMutation.isPending
+                      verifyPortalAccessMutation.isPending
                     }
                     className="h-11 shrink-0 whitespace-nowrap rounded-full px-5"
                   >
-                    {isVerifyingCode || verifyPortalLoginCodeMutation.isPending ? (
+                    {isVerifyingCode || verifyPortalAccessMutation.isPending ? (
                       <span className="inline-flex items-center gap-2">
                         <Spinner size={14} />
                         Verifying

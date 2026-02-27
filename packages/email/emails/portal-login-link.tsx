@@ -24,7 +24,7 @@ export const PortalLoginLinkEmail = ({
   email = "client@example.com",
   teamName = "Connor & Co",
   customerName = "there",
-  otpCode = "123456",
+  otpCode = "12345678",
 }: Props) => {
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
@@ -66,7 +66,7 @@ export const PortalLoginLinkEmail = ({
             style={{ color: lightStyles.text.color }}
           >
             We set up your secure portal with <strong>{teamName}</strong>. Use
-            the 6-digit code below to sign in.
+            the 8-digit code below to sign in.
           </Text>
 
           <Section className="mb-[32px] mt-[32px] text-center">
