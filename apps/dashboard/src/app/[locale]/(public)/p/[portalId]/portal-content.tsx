@@ -93,8 +93,6 @@ type PortalMessage = {
 };
 
 const PORTAL_SESSION_TTL_MS = 48 * 60 * 60 * 1000;
-const PORTAL_SESSION_SYNC_MAX_ATTEMPTS = 10;
-const PORTAL_SESSION_SYNC_DELAY_MS = 150;
 
 function getPortalSessionKey(portalId: string) {
   return `portal-session-expires-at:${portalId}`;
@@ -125,30 +123,6 @@ function hasValidPortalSession(portalId: string) {
   if (!Number.isFinite(expiresAt)) return false;
 
   return expiresAt > Date.now();
-}
-
-async function waitForSessionEmail(
-  supabase: ReturnType<typeof createClient>,
-  expectedEmail: string,
-) {
-  const normalizedExpected = expectedEmail.trim().toLowerCase();
-
-  for (let attempt = 0; attempt < PORTAL_SESSION_SYNC_MAX_ATTEMPTS; attempt++) {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    const sessionEmail = session?.user?.email?.trim().toLowerCase();
-    if (sessionEmail && sessionEmail === normalizedExpected) {
-      return true;
-    }
-
-    await new Promise((resolve) =>
-      setTimeout(resolve, PORTAL_SESSION_SYNC_DELAY_MS),
-    );
-  }
-
-  return false;
 }
 
 const REQUEST_COLUMNS: Array<{
@@ -315,6 +289,9 @@ export function PortalContent({ portalId }: Props) {
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState<
     string | null
   >(null);
+  const [verificationToken, setVerificationToken] = useState<string | null>(
+    null,
+  );
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [isRestoringSession, setIsRestoringSession] = useState(true);
 
@@ -361,16 +338,21 @@ export function PortalContent({ portalId }: Props) {
 
   const sendPortalLoginLinkMutation = useMutation(
     trpc.customers.sendPortalLoginLink.mutationOptions({
-      onSuccess: (_, variables) => {
+      onSuccess: (result, variables) => {
         setAuthError(null);
         setCodeSentTo(variables.email);
         setPendingVerificationEmail(variables.email);
+        setVerificationToken(result.verificationToken);
         setOtpCode("");
       },
       onError: (error) => {
         setAuthError(error.message || "Unable to send secure sign-in link");
       },
     }),
+  );
+
+  const verifyPortalLoginCodeMutation = useMutation(
+    trpc.customers.verifyPortalLoginCode.mutationOptions(),
   );
 
   useEffect(() => {
@@ -594,6 +576,7 @@ export function PortalContent({ portalId }: Props) {
     setAuthError(null);
     setCodeSentTo(null);
     setPendingVerificationEmail(null);
+    setVerificationToken(null);
     setOtpCode("");
     sendPortalLoginLinkMutation.mutate({ portalId, email });
   };
@@ -603,6 +586,7 @@ export function PortalContent({ portalId }: Props) {
 
     if (
       !pendingVerificationEmail ||
+      !verificationToken ||
       otpCode.length !== 8 ||
       isVerifyingCode ||
       verifyPortalAccessMutation.isPending
@@ -614,37 +598,18 @@ export function PortalContent({ portalId }: Props) {
     setAuthError(null);
 
     try {
-      let verificationError: Error | null = null;
+      const result = await verifyPortalLoginCodeMutation.mutateAsync({
+        portalId,
+        email: pendingVerificationEmail,
+        code: otpCode,
+        verificationToken,
+      });
 
-      for (const otpType of ["magiclink", "email"] as const) {
-        const { error } = await supabase.auth.verifyOtp({
-          email: pendingVerificationEmail,
-          token: otpCode,
-          type: otpType,
-        });
-
-        if (!error) {
-          verificationError = null;
-          break;
-        }
-
-        verificationError = new Error(error.message);
+      if (!result?.actionLink) {
+        throw new Error("Unable to complete sign-in right now");
       }
 
-      if (verificationError) {
-        throw verificationError;
-      }
-
-      const sessionReady = await waitForSessionEmail(
-        supabase,
-        pendingVerificationEmail,
-      );
-
-      if (!sessionReady) {
-        throw new Error("Sign-in session is still syncing. Please try again.");
-      }
-
-      await verifyPortalAccessMutation.mutateAsync({ portalId });
+      window.location.assign(result.actionLink);
     } catch (error) {
       setAuthError(
         error instanceof Error ? error.message : "Invalid or expired code",
@@ -661,6 +626,7 @@ export function PortalContent({ portalId }: Props) {
     setAuthError(null);
     setCodeSentTo(null);
     setPendingVerificationEmail(null);
+    setVerificationToken(null);
     setOtpCode("");
     setRequestError(null);
     setMessageError(null);
@@ -983,11 +949,11 @@ export function PortalContent({ portalId }: Props) {
                     disabled={
                       otpCode.length !== 8 ||
                       isVerifyingCode ||
-                      verifyPortalAccessMutation.isPending
+                      verifyPortalLoginCodeMutation.isPending
                     }
                     className="h-11 shrink-0 whitespace-nowrap rounded-full px-5"
                   >
-                    {isVerifyingCode || verifyPortalAccessMutation.isPending ? (
+                    {isVerifyingCode || verifyPortalLoginCodeMutation.isPending ? (
                       <span className="inline-flex items-center gap-2">
                         <Spinner size={14} />
                         Verifying
