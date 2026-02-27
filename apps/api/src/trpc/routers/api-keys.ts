@@ -33,7 +33,7 @@ export const apiKeysRouter = createTRPCRouter({
         try {
           // We don't need to await this, it will be sent in the background
           resend.emails.send({
-            from: "Connor & Cobot <connor@connorandco.vercel.app>",
+            from: "Connor & Co <connor@connorandco-app-dashboard.vercel.app>",
             to: session.user.email!,
             subject: "New API Key Created",
             react: ApiKeyCreatedEmail({
