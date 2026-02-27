@@ -44,7 +44,7 @@ export const oauthAuthorizationResponseSchema = z.object({
   authorize_url: z.string().url().openapi({
     description: "URL to redirect user for authorization",
     example:
-      "https://app.app.connorco.dev/oauth/authorize?client_id=mid_abcdef123456789&...",
+      "https://app.connorco.dev/oauth/authorize?client_id=mid_abcdef123456789&...",
   }),
 });
 

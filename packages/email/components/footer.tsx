@@ -221,7 +221,7 @@ export function Footer() {
 
       <Link
         className={`text-[14px] block ${themeClasses.mutedLink}`}
-        href="https://app.app.connorco.dev/settings/notifications"
+        href="https://app.connorco.dev/settings/notifications"
         title="Unsubscribe"
         style={{ color: lightStyles.mutedText.color }}
       >

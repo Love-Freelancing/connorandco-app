@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@connorco/ui/dialog";
 import { Input } from "@connorco/ui/input";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@connorco/ui/input-otp";
 import { Spinner } from "@connorco/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@connorco/ui/tabs";
 import { Textarea } from "@connorco/ui/textarea";
@@ -90,6 +91,39 @@ type PortalMessage = {
   attachments?: PortalAttachment[];
   createdAt: string | null;
 };
+
+const PORTAL_SESSION_TTL_MS = 48 * 60 * 60 * 1000;
+
+function getPortalSessionKey(portalId: string) {
+  return `portal-session-expires-at:${portalId}`;
+}
+
+function setPortalSessionExpiry(portalId: string) {
+  if (typeof window === "undefined") return;
+
+  localStorage.setItem(
+    getPortalSessionKey(portalId),
+    `${Date.now() + PORTAL_SESSION_TTL_MS}`,
+  );
+}
+
+function clearPortalSessionExpiry(portalId: string) {
+  if (typeof window === "undefined") return;
+
+  localStorage.removeItem(getPortalSessionKey(portalId));
+}
+
+function hasValidPortalSession(portalId: string) {
+  if (typeof window === "undefined") return false;
+
+  const expiresAtRaw = localStorage.getItem(getPortalSessionKey(portalId));
+  if (!expiresAtRaw) return false;
+
+  const expiresAt = Number.parseInt(expiresAtRaw, 10);
+  if (!Number.isFinite(expiresAt)) return false;
+
+  return expiresAt > Date.now();
+}
 
 const REQUEST_COLUMNS: Array<{
   status: RequestStatus;
@@ -248,9 +282,14 @@ export function PortalContent({ portalId }: Props) {
   const supabase = useMemo(() => createClient(), []);
 
   const [emailInput, setEmailInput] = useState("");
+  const [otpCode, setOtpCode] = useState("");
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [magicLinkSentTo, setMagicLinkSentTo] = useState<string | null>(null);
+  const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<
+    string | null
+  >(null);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [isRestoringSession, setIsRestoringSession] = useState(true);
 
   const [requestTitle, setRequestTitle] = useState("");
@@ -281,11 +320,15 @@ export function PortalContent({ portalId }: Props) {
       onSuccess: ({ email }) => {
         setSignedInEmail(email);
         setAuthError(null);
-        setMagicLinkSentTo(null);
+        setCodeSentTo(null);
+        setPendingVerificationEmail(null);
+        setOtpCode("");
+        setPortalSessionExpiry(portalId);
       },
       onError: (error) => {
         setSignedInEmail(null);
         setAuthError(error.message || "Unable to sign in to customer portal");
+        clearPortalSessionExpiry(portalId);
       },
     }),
   );
@@ -294,7 +337,9 @@ export function PortalContent({ portalId }: Props) {
     trpc.customers.sendPortalLoginLink.mutationOptions({
       onSuccess: (_, variables) => {
         setAuthError(null);
-        setMagicLinkSentTo(variables.email);
+        setCodeSentTo(variables.email);
+        setPendingVerificationEmail(variables.email);
+        setOtpCode("");
       },
       onError: (error) => {
         setAuthError(error.message || "Unable to send secure sign-in link");
@@ -310,6 +355,16 @@ export function PortalContent({ portalId }: Props) {
 
       if (!email) {
         setSignedInEmail(null);
+        setPendingVerificationEmail(null);
+        setIsRestoringSession(false);
+        return;
+      }
+
+      if (!hasValidPortalSession(portalId)) {
+        clearPortalSessionExpiry(portalId);
+        await supabase.auth.signOut();
+        setSignedInEmail(null);
+        setPendingVerificationEmail(null);
         setIsRestoringSession(false);
         return;
       }
@@ -511,15 +566,56 @@ export function PortalContent({ portalId }: Props) {
     }
 
     setAuthError(null);
-    setMagicLinkSentTo(null);
+    setCodeSentTo(null);
+    setPendingVerificationEmail(null);
+    setOtpCode("");
     sendPortalLoginLinkMutation.mutate({ portalId, email });
+  };
+
+  const handleVerifyPortalCode = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (
+      !pendingVerificationEmail ||
+      otpCode.length !== 6 ||
+      isVerifyingCode ||
+      verifyPortalAccessMutation.isPending
+    ) {
+      return;
+    }
+
+    setIsVerifyingCode(true);
+    setAuthError(null);
+
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: pendingVerificationEmail,
+        token: otpCode,
+        type: "email",
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      await verifyPortalAccessMutation.mutateAsync({ portalId });
+    } catch (error) {
+      setAuthError(
+        error instanceof Error ? error.message : "Invalid or expired code",
+      );
+    } finally {
+      setIsVerifyingCode(false);
+    }
   };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    clearPortalSessionExpiry(portalId);
     setSignedInEmail(null);
     setAuthError(null);
-    setMagicLinkSentTo(null);
+    setCodeSentTo(null);
+    setPendingVerificationEmail(null);
+    setOtpCode("");
     setRequestError(null);
     setMessageError(null);
     setBillingError(null);
@@ -765,7 +861,7 @@ export function PortalContent({ portalId }: Props) {
                 Welcome to your client portal
               </h2>
               <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
-                Sign in to track progress, request updates, and view invoices.
+                Enter your email to receive a 6-digit sign-in code.
               </p>
 
               <form
@@ -793,23 +889,63 @@ export function PortalContent({ portalId }: Props) {
                   {sendPortalLoginLinkMutation.isPending ? (
                     <span className="inline-flex items-center gap-2">
                       <Spinner size={14} />
-                      Sending link
+                      Sending code
                     </span>
                   ) : (
-                    "Send login link"
+                    "Send code"
                   )}
                 </Button>
               </form>
 
-              {magicLinkSentTo ? (
+              {codeSentTo ? (
                 <p className="mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <CheckCircle2 size={16} className="text-emerald-500" />
-                  Check your email. We sent a secure sign-in link to{" "}
+                  Check your email. We sent a 6-digit code to{" "}
                   <span className="font-medium text-foreground">
-                    {magicLinkSentTo}
+                    {codeSentTo}
                   </span>
                   .
                 </p>
+              ) : null}
+
+              {pendingVerificationEmail ? (
+                <form
+                  onSubmit={handleVerifyPortalCode}
+                  className="mx-auto mt-4 flex w-full max-w-3xl flex-col items-center gap-3"
+                >
+                  <InputOTP
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={setOtpCode}
+                    disabled={isVerifyingCode || verifyPortalAccessMutation.isPending}
+                    render={({ slots }) => (
+                      <InputOTPGroup>
+                        {slots.map((slot, index) => (
+                          <InputOTPSlot key={index.toString()} {...slot} />
+                        ))}
+                      </InputOTPGroup>
+                    )}
+                  />
+
+                  <Button
+                    type="submit"
+                    disabled={
+                      otpCode.length !== 6 ||
+                      isVerifyingCode ||
+                      verifyPortalAccessMutation.isPending
+                    }
+                    className="h-11 shrink-0 whitespace-nowrap rounded-full px-5"
+                  >
+                    {isVerifyingCode || verifyPortalAccessMutation.isPending ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Spinner size={14} />
+                        Verifying
+                      </span>
+                    ) : (
+                      "Verify code"
+                    )}
+                  </Button>
+                </form>
               ) : null}
 
               {authError ? (

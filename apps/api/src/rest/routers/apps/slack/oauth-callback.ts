@@ -237,7 +237,7 @@ app.openapi(
 
         // Build redirect URL to dashboard
         const dashboardUrl =
-          process.env.CONNORCO_DASHBOARD_URL || "https://app.app.connorco.dev";
+          process.env.CONNORCO_DASHBOARD_URL || "https://app.connorco.dev";
 
         return c.redirect(`${dashboardUrl}/oauth-callback?status=success`, 302);
       }

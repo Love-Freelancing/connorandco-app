@@ -8,7 +8,6 @@ import {
 } from "@react-email/components";
 import { Logo } from "../components/logo";
 import {
-  Button,
   EmailThemeProvider,
   getEmailInlineStyles,
   getEmailThemeClasses,
@@ -18,14 +17,14 @@ interface Props {
   email?: string;
   teamName?: string;
   customerName?: string;
-  portalUrl?: string;
+  otpCode?: string;
 }
 
 export const PortalLoginLinkEmail = ({
   email = "client@example.com",
   teamName = "Connor & Co",
   customerName = "there",
-  portalUrl = "https://app.connorco.dev/client",
+  otpCode = "123456",
 }: Props) => {
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
@@ -67,11 +66,16 @@ export const PortalLoginLinkEmail = ({
             style={{ color: lightStyles.text.color }}
           >
             We set up your secure portal with <strong>{teamName}</strong>. Use
-            the link below to sign in instantly.
+            the 6-digit code below to sign in.
           </Text>
 
           <Section className="mb-[32px] mt-[32px] text-center">
-            <Button href={portalUrl}>Access your portal</Button>
+            <Text
+              className={`m-0 text-[30px] font-semibold tracking-[10px] ${themeClasses.text}`}
+              style={{ color: lightStyles.text.color }}
+            >
+              {otpCode}
+            </Text>
           </Section>
 
           <Section>

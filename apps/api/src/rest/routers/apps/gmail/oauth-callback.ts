@@ -88,7 +88,7 @@ app.openapi(
     const query = c.req.valid("query");
     const { code, state, error } = query;
     const dashboardUrl =
-      process.env.CONNORCO_DASHBOARD_URL || "https://app.app.connorco.dev";
+      process.env.CONNORCO_DASHBOARD_URL || "https://app.connorco.dev";
 
     // Try to decrypt state first to determine redirect target (apps vs inbox)
     const parsedState = decryptOAuthState(state);

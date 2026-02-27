@@ -44,7 +44,7 @@
     "urls": [
       "http://localhost:3001/**",
       "https://beta.app.connorco.dev/**",
-      "https://app.app.connorco.dev/**"
+      "https://app.connorco.dev/**"
     ]
   },
   "platforms": ["macOS"]

@@ -100,7 +100,7 @@ app.openapi(
     });
 
     const _dashboardUrl =
-      process.env.CONNORCO_DASHBOARD_URL || "https://app.app.connorco.dev";
+      process.env.CONNORCO_DASHBOARD_URL || "https://app.connorco.dev";
     const redirectUri = `${process.env.CONNORCO_API_URL || "https://api.app.connorco.dev"}/invoice-payments/connect-stripe/callback`;
 
     // Build Stripe Connect OAuth URL (Standard accounts)
@@ -183,7 +183,7 @@ app.openapi(
     const db = c.get("db");
     const { code, state, error, error_description } = c.req.valid("query");
     const dashboardUrl =
-      process.env.CONNORCO_DASHBOARD_URL || "https://app.app.connorco.dev";
+      process.env.CONNORCO_DASHBOARD_URL || "https://app.connorco.dev";
 
     // Handle OAuth errors
     if (error || !code) {

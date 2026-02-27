@@ -12,7 +12,7 @@ import { isDesktopApp } from "@/utils/desktop";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://app.app.connorco.dev"),
+  metadataBase: new URL("https://app.connorco.dev"),
   title: "Connor & Co | Your AI-Powered Business Assistant",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: "Connor & Co | Your AI-Powered Business Assistant",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
-    url: "https://app.app.connorco.dev",
+    url: "https://app.connorco.dev",
     siteName: "Connor & Co",
     images: [
       {

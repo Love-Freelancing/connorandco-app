@@ -36,7 +36,7 @@ export default function imageLoader({
 
   // Existing logic for other URLs
   if (src.startsWith("/_next")) {
-    return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/https://app.app.connorco.dev${src}`;
+    return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/https://app.connorco.dev${src}`;
   }
   return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/${src}`;
 }

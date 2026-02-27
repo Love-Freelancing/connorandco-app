@@ -273,7 +273,7 @@ async function sendSlackNotification<T extends ProviderNotificationType>(
               {
                 type: "button",
                 text: { type: "plain_text", text: "View transactions" },
-                url: "https://app.app.connorco.dev/transactions",
+                url: "https://app.connorco.dev/transactions",
                 action_id: "button_click",
               },
             ],

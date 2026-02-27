@@ -8,7 +8,7 @@ export function getAppUrl() {
   // (NODE_ENV is always "production" in Docker builds, even for staging)
   if (process.env.RAILWAY_ENVIRONMENT) {
     if (process.env.RAILWAY_ENVIRONMENT === "production") {
-      return "https://app.app.connorco.dev";
+      return "https://app.connorco.dev";
     }
 
     // Non-production Railway environment (staging, etc.)
@@ -19,7 +19,7 @@ export function getAppUrl() {
 
   // Non-Railway production (e.g. other hosting platforms)
   if (process.env.NODE_ENV === "production") {
-    return "https://app.app.connorco.dev";
+    return "https://app.connorco.dev";
   }
 
   return "http://localhost:3001";

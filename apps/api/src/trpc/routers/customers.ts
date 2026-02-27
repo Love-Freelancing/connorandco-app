@@ -801,7 +801,9 @@ export const customersRouter = createTRPCRouter({
         },
       });
 
-      if (error || !data.properties?.action_link) {
+      const emailOtp = data.properties?.email_otp;
+
+      if (error || !emailOtp) {
         logger.error("customers.sendPortalLoginLink failed to generate link", {
           customerId: customer.id,
           teamId: customer.teamId,
@@ -819,13 +821,13 @@ export const customersRouter = createTRPCRouter({
           email: providedEmail,
           teamName: customer.team.name ?? "Connor & Co",
           customerName: customer.name ?? "there",
-          portalUrl: data.properties.action_link,
+          otpCode: emailOtp,
         }),
       );
       await resend.emails.send({
         from: "Connor & Co <connor@connorco.dev>",
         to: providedEmail,
-        subject: `Sign in to ${customer.team.name ?? "Connor & Co"} portal`,
+        subject: `Your sign-in code for ${customer.team.name ?? "Connor & Co"}`,
         html,
       });
 
