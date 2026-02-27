@@ -93,6 +93,8 @@ type PortalMessage = {
 };
 
 const PORTAL_SESSION_TTL_MS = 48 * 60 * 60 * 1000;
+const PORTAL_SESSION_SYNC_MAX_ATTEMPTS = 10;
+const PORTAL_SESSION_SYNC_DELAY_MS = 150;
 
 function getPortalSessionKey(portalId: string) {
   return `portal-session-expires-at:${portalId}`;
@@ -123,6 +125,30 @@ function hasValidPortalSession(portalId: string) {
   if (!Number.isFinite(expiresAt)) return false;
 
   return expiresAt > Date.now();
+}
+
+async function waitForSessionEmail(
+  supabase: ReturnType<typeof createClient>,
+  expectedEmail: string,
+) {
+  const normalizedExpected = expectedEmail.trim().toLowerCase();
+
+  for (let attempt = 0; attempt < PORTAL_SESSION_SYNC_MAX_ATTEMPTS; attempt++) {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const sessionEmail = session?.user?.email?.trim().toLowerCase();
+    if (sessionEmail && sessionEmail === normalizedExpected) {
+      return true;
+    }
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, PORTAL_SESSION_SYNC_DELAY_MS),
+    );
+  }
+
+  return false;
 }
 
 const REQUEST_COLUMNS: Array<{
@@ -596,6 +622,15 @@ export function PortalContent({ portalId }: Props) {
 
       if (error) {
         throw new Error(error.message);
+      }
+
+      const sessionReady = await waitForSessionEmail(
+        supabase,
+        pendingVerificationEmail,
+      );
+
+      if (!sessionReady) {
+        throw new Error("Sign-in session is still syncing. Please try again.");
       }
 
       await verifyPortalAccessMutation.mutateAsync({ portalId });
