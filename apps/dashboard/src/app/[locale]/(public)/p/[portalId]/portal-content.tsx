@@ -614,14 +614,25 @@ export function PortalContent({ portalId }: Props) {
     setAuthError(null);
 
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: pendingVerificationEmail,
-        token: otpCode,
-        type: "email",
-      });
+      let verificationError: Error | null = null;
 
-      if (error) {
-        throw new Error(error.message);
+      for (const otpType of ["magiclink", "email"] as const) {
+        const { error } = await supabase.auth.verifyOtp({
+          email: pendingVerificationEmail,
+          token: otpCode,
+          type: otpType,
+        });
+
+        if (!error) {
+          verificationError = null;
+          break;
+        }
+
+        verificationError = new Error(error.message);
+      }
+
+      if (verificationError) {
+        throw verificationError;
       }
 
       const sessionReady = await waitForSessionEmail(
