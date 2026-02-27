@@ -298,7 +298,7 @@ export const inboxPreSignedUrlResponseSchema = z.object({
     description:
       "Pre-signed URL for accessing the inbox attachment, valid for 60 seconds",
     example:
-      "https://service.connorandco.vercel.app/storage/v1/object/sign/vault/inbox/document.pdf?token=abc123&expires=1640995200",
+      "https://service.app.connorco.dev/storage/v1/object/sign/vault/inbox/document.pdf?token=abc123&expires=1640995200",
   }),
   expiresAt: z.string().datetime().openapi({
     description: "ISO 8601 timestamp when the URL expires",

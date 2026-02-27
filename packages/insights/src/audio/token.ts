@@ -107,7 +107,7 @@ export async function verifyAudioToken(
 /**
  * Build the public audio URL with token for email links
  *
- * @param baseUrl - API base URL (e.g., "https://api.connorandco.vercel.app")
+ * @param baseUrl - API base URL (e.g., "https://api.app.connorco.dev")
  * @param insightId - The insight ID
  * @param token - The signed JWT token
  * @returns Full URL for public audio access

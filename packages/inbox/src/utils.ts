@@ -48,10 +48,10 @@ export function decryptOAuthState(
 
 export function getInboxEmail(inboxId: string) {
   if (process.env.NODE_ENV !== "production") {
-    return `${inboxId}@inbox.staging.connorandco.vercel.app`;
+    return `${inboxId}@inbox.staging.app.connorco.dev`;
   }
 
-  return `${inboxId}@inbox.connorandco.vercel.app`;
+  return `${inboxId}@inbox.app.connorco.dev`;
 }
 
 /**

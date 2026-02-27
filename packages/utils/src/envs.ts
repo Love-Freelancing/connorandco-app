@@ -8,7 +8,7 @@ export function getAppUrl() {
   // (NODE_ENV is always "production" in Docker builds, even for staging)
   if (process.env.RAILWAY_ENVIRONMENT) {
     if (process.env.RAILWAY_ENVIRONMENT === "production") {
-      return "https://app.connorandco.vercel.app";
+      return "https://app.app.connorco.dev";
     }
 
     // Non-production Railway environment (staging, etc.)
@@ -19,7 +19,7 @@ export function getAppUrl() {
 
   // Non-Railway production (e.g. other hosting platforms)
   if (process.env.NODE_ENV === "production") {
-    return "https://app.connorandco.vercel.app";
+    return "https://app.app.connorco.dev";
   }
 
   return "http://localhost:3001";
@@ -30,11 +30,11 @@ export function getEmailUrl() {
     return "http://localhost:3000";
   }
 
-  return "https://connorandco.vercel.app";
+  return "https://app.connorco.dev";
 }
 
 export function getCdnUrl() {
-  return "https://cdn.connorandco.vercel.app";
+  return "https://cdn.app.connorco.dev";
 }
 
 export function getApiUrl() {
@@ -47,7 +47,7 @@ export function getApiUrl() {
   // (NODE_ENV is always "production" in Docker builds, even for staging)
   if (process.env.RAILWAY_ENVIRONMENT) {
     if (process.env.RAILWAY_ENVIRONMENT === "production") {
-      return "https://api.connorandco.vercel.app";
+      return "https://api.app.connorco.dev";
     }
 
     // Non-production Railway environment (staging, etc.)
@@ -57,7 +57,7 @@ export function getApiUrl() {
 
   // Non-Railway production (e.g. other hosting platforms)
   if (process.env.NODE_ENV === "production") {
-    return "https://api.connorandco.vercel.app";
+    return "https://api.app.connorco.dev";
   }
 
   return "http://localhost:3002";

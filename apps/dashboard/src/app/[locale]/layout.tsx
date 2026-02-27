@@ -12,7 +12,7 @@ import { isDesktopApp } from "@/utils/desktop";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://app.connorandco.vercel.app"),
+  metadataBase: new URL("https://app.app.connorco.dev"),
   title: "Connor & Co | Your AI-Powered Business Assistant",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
@@ -22,12 +22,12 @@ export const metadata: Metadata = {
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
     images: [
       {
-        url: "https://cdn.connorandco.vercel.app/opengraph-image-v1.jpg",
+        url: "https://cdn.app.connorco.dev/opengraph-image-v1.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.connorandco.vercel.app/opengraph-image-v1.jpg",
+        url: "https://cdn.app.connorco.dev/opengraph-image-v1.jpg",
         width: 1800,
         height: 1600,
       },
@@ -37,16 +37,16 @@ export const metadata: Metadata = {
     title: "Connor & Co | Your AI-Powered Business Assistant",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
-    url: "https://app.connorandco.vercel.app",
+    url: "https://app.app.connorco.dev",
     siteName: "Connor & Co",
     images: [
       {
-        url: "https://cdn.connorandco.vercel.app/opengraph-image-v1.jpg",
+        url: "https://cdn.app.connorco.dev/opengraph-image-v1.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.connorandco.vercel.app/opengraph-image-v1.jpg",
+        url: "https://cdn.app.connorco.dev/opengraph-image-v1.jpg",
         width: 1800,
         height: 1600,
       },

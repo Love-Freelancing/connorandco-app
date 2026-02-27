@@ -21,5 +21,5 @@ export default {
 2. Add your Connor & Co API key to OpenCode's MCP configuration
 3. Restart OpenCode and ask about your Connor & Co data`,
   images: [],
-  installUrl: "https://connorandco.vercel.app/mcp/opencode",
+  installUrl: "https://app.connorco.dev/mcp/opencode",
 };

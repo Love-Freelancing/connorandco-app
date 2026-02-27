@@ -44,7 +44,7 @@ export const oauthAuthorizationResponseSchema = z.object({
   authorize_url: z.string().url().openapi({
     description: "URL to redirect user for authorization",
     example:
-      "https://app.connorandco.vercel.app/oauth/authorize?client_id=mid_abcdef123456789&...",
+      "https://app.app.connorco.dev/oauth/authorize?client_id=mid_abcdef123456789&...",
   }),
 });
 
@@ -167,7 +167,7 @@ export const oauthErrorResponseSchema = z.object({
   }),
   error_uri: z.string().url().optional().openapi({
     description: "URI to a human-readable error page",
-    example: "https://docs.connorandco.vercel.app/errors/invalid_request",
+    example: "https://docs.app.connorco.dev/errors/invalid_request",
   }),
   // SECURITY: Enhanced state parameter validation (optional for error responses)
   state: z

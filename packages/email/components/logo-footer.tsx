@@ -32,7 +32,7 @@ export function LogoFooter() {
           }
         `}</style>
 
-      <Link href="https://go.connorandco.vercel.app/FZwOHud">
+      <Link href="https://go.app.connorco.dev/FZwOHud">
         <Img
           src={`${baseUrl}/email/logo-footer.png`}
           width="80"

@@ -124,7 +124,7 @@ export default async function Page({ params }: Props) {
           <p className="text-center text-xs text-muted-foreground">
             Powered by{" "}
             <a
-              href="https://connorandco.vercel.app"
+              href="https://app.connorco.dev"
               className="hover:text-foreground transition-colors"
             >
               Connor & Co

@@ -21,5 +21,5 @@ export default {
 2. Configure authentication with your Connor & Co API key
 3. Use the available tools in your workflows and AI agents`,
   images: [],
-  installUrl: "https://connorandco.vercel.app/mcp/n8n",
+  installUrl: "https://app.connorco.dev/mcp/n8n",
 };

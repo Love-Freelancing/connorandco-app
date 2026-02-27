@@ -21,5 +21,5 @@ export default {
 2. Use the Claude CLI or Desktop app configuration
 3. Add your Connor & Co API key and start chatting`,
   images: [],
-  installUrl: "https://connorandco.vercel.app/mcp/claude",
+  installUrl: "https://app.connorco.dev/mcp/claude",
 };

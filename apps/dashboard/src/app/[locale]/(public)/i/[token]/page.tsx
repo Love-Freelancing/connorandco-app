@@ -153,7 +153,7 @@ export default async function Page(props: Props) {
 
       <div className="fixed bottom-4 right-4 hidden md:block">
         <a
-          href="connorandco.vercel.app"
+          href="app.connorco.dev"
           target="_blank"
           rel="noreferrer"
           className="text-[9px] text-[#878787]"

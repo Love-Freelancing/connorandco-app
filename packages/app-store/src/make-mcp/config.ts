@@ -21,5 +21,5 @@ export default {
 2. Configure the Connor & Co MCP server URL and authentication
 3. Select tools and map inputs in the visual builder`,
   images: [],
-  installUrl: "https://connorandco.vercel.app/mcp/make",
+  installUrl: "https://app.connorco.dev/mcp/make",
 };

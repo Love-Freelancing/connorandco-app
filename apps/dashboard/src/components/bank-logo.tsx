@@ -26,14 +26,14 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
         />
       ) : (
         <AvatarImage
-          src="https://cdn-engine.connorandco.vercel.app/default.jpg"
+          src="https://cdn-engine.app.connorco.dev/default.jpg"
           alt={alt}
           className="object-contain"
         />
       )}
       <AvatarFallback>
         <AvatarImage
-          src="https://cdn-engine.connorandco.vercel.app/default.jpg"
+          src="https://cdn-engine.app.connorco.dev/default.jpg"
           alt={alt}
           className="object-contain"
         />

@@ -20,5 +20,5 @@ export default {
 2. Add the MCP server configuration to Perplexity
 3. Add your Connor & Co API key and start asking questions`,
   images: [],
-  installUrl: "https://connorandco.vercel.app/mcp/perplexity",
+  installUrl: "https://app.connorco.dev/mcp/perplexity",
 };

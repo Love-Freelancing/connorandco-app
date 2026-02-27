@@ -8,7 +8,7 @@ export default function Verify() {
   return (
     <div>
       <div className="absolute left-4 top-4">
-        <Link href="https://connorandco.vercel.app">
+        <Link href="https://app.connorco.dev">
           <Icons.LogoMark className="h-6 w-auto" />
         </Link>
       </div>

@@ -66,7 +66,7 @@ function formatInvoiceDueDate(dueDate: string, dateFormat: string) {
 export const InvoiceEmail = ({
   customerName = "Customer",
   teamName = "Connor & Co",
-  link = "https://app.connorandco.vercel.app/i/1234567890",
+  link = "https://app.app.connorco.dev/i/1234567890",
   invoiceNumber,
   amount,
   currency,

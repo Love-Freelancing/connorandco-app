@@ -471,7 +471,7 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
                   text: "View in Connor & Co",
                   emoji: true,
                 },
-                url: `https://app.connorandco.vercel.app/inbox?inboxId=${encodeURIComponent(updatedInbox.id)}`,
+                url: `https://app.app.connorco.dev/inbox?inboxId=${encodeURIComponent(updatedInbox.id)}`,
                 action_id: "view_receipt",
               },
             ],

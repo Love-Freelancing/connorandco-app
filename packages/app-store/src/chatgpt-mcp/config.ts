@@ -21,5 +21,5 @@ export default {
 2. Use the ChatGPT Developer config or MCP SDK
 3. Add your Connor & Co API key and start building`,
   images: [],
-  installUrl: "https://connorandco.vercel.app/mcp/chatgpt",
+  installUrl: "https://app.connorco.dev/mcp/chatgpt",
 };

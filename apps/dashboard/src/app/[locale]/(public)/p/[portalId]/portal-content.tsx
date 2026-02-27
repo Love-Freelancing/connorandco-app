@@ -1912,7 +1912,7 @@ export function PortalContent({ portalId }: Props) {
 
       <div className="fixed bottom-4 right-4 hidden md:block">
         <a
-          href="https://connorandco.vercel.app"
+          href="https://app.connorco.dev"
           target="_blank"
           rel="noreferrer"
           className="text-[9px] text-muted-foreground"

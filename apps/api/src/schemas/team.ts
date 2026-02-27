@@ -11,7 +11,7 @@ export const teamResponseSchema = z.object({
   }),
   logoUrl: z.string().url().nullable().openapi({
     description: "URL to the team's logo image",
-    example: "https://cdn.connorandco.vercel.app/logos/acme-corp.png",
+    example: "https://cdn.app.connorco.dev/logos/acme-corp.png",
   }),
   plan: z.enum(["trial", "starter", "pro"]).openapi({
     description: "Current subscription plan of the team",
@@ -72,14 +72,14 @@ export const updateTeamByIdSchema = z.object({
   logoUrl: z
     .string()
     .url()
-    .refine((url) => url.includes("connorandco.vercel.app"), {
-      message: "logoUrl must be a connorandco.vercel.app domain URL",
+    .refine((url) => url.includes("app.connorco.dev"), {
+      message: "logoUrl must be a app.connorco.dev domain URL",
     })
     .optional()
     .openapi({
       description:
-        "URL to the team's logo image. Must be hosted on connorandco.vercel.app domain",
-      example: "https://cdn.connorandco.vercel.app/logos/acme-corp.png",
+        "URL to the team's logo image. Must be hosted on app.connorco.dev domain",
+      example: "https://cdn.app.connorco.dev/logos/acme-corp.png",
     }),
   baseCurrency: z.string().optional().openapi({
     description:
@@ -144,7 +144,7 @@ export const createTeamSchema = z.object({
     }),
   logoUrl: z.string().url().optional().openapi({
     description: "URL to the team's logo image",
-    example: "https://cdn.connorandco.vercel.app/logos/acme-corp.png",
+    example: "https://cdn.app.connorco.dev/logos/acme-corp.png",
   }),
   switchTeam: z.boolean().optional().default(false).openapi({
     description:
@@ -261,7 +261,7 @@ export const teamMemberResponseSchema = z.object({
   }),
   avatarUrl: z.string().url().nullable().openapi({
     description: "URL to the team member's avatar image",
-    example: "https://cdn.connorandco.vercel.app/avatars/john-doe.png",
+    example: "https://cdn.app.connorco.dev/avatars/john-doe.png",
   }),
 });
 

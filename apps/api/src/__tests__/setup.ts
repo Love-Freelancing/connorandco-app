@@ -376,4 +376,4 @@ process.env.DATABASE_SJC_URL =
 process.env.DATABASE_IAD_URL =
   process.env.DATABASE_IAD_URL || "postgres://test:test@localhost:5432/test";
 process.env.CONNORCO_DASHBOARD_URL =
-  process.env.CONNORCO_DASHBOARD_URL || "https://app.connorandco.vercel.app";
+  process.env.CONNORCO_DASHBOARD_URL || "https://app.app.connorco.dev";

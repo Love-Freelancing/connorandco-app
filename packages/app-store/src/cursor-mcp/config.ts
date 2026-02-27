@@ -21,5 +21,5 @@ export default {
 2. Add your Connor & Co API key to Cursor's MCP configuration
 3. Restart Cursor and @-mention Connor & Co in chat`,
   images: [],
-  installUrl: "https://connorandco.vercel.app/mcp/cursor",
+  installUrl: "https://app.connorco.dev/mcp/cursor",
 };

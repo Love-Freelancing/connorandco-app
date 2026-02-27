@@ -26,7 +26,7 @@ function getFaviconUrl(url: string): string {
 }
 
 /**
- * Modify URL to add utm_source=connorandco.vercel.app and replace utm_source=openai if present
+ * Modify URL to add utm_source=app.connorco.dev and replace utm_source=openai if present
  */
 function modifyUrlWithUtmSource(url: string): string {
   try {
@@ -35,8 +35,8 @@ function modifyUrlWithUtmSource(url: string): string {
     // Remove existing utm_source parameter if present
     urlObj.searchParams.delete("utm_source");
 
-    // Add utm_source=connorandco.vercel.app
-    urlObj.searchParams.set("utm_source", "connorandco.vercel.app");
+    // Add utm_source=app.connorco.dev
+    urlObj.searchParams.set("utm_source", "app.connorco.dev");
 
     return urlObj.toString();
   } catch {

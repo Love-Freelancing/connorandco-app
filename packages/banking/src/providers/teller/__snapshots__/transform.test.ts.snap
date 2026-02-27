@@ -171,7 +171,7 @@ exports[`Transform accounts 1`] = `
   "id": "acc_os557c2mge29shubl2000",
   "institution": {
     "id": "mercury",
-    "logo": "https://cdn-engine.connorandco.vercel.app/mercury.jpg",
+    "logo": "https://cdn-engine.app.connorco.dev/mercury.jpg",
     "name": "Mercury",
     "provider": "teller",
   },

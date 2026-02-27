@@ -39,7 +39,7 @@ export const invoiceSent: NotificationHandler = {
       emailType: "customer",
       to: [data.customerEmail],
       subject,
-      from: `${team.name} <connor@connorandco.vercel.app>`,
+      from: `${team.name} <connor@app.connorco.dev>`,
       data: {
         customerName: data.customerName,
         teamName: team.name,

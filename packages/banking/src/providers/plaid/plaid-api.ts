@@ -58,10 +58,10 @@ export class PlaidApi {
 
   #generateWebhookUrl(environment: "sandbox" | "production") {
     if (environment === "sandbox") {
-      return "https://staging.api.connorandco.vercel.app/webhook/plaid";
+      return "https://staging.api.app.connorco.dev/webhook/plaid";
     }
 
-    return "https://api.connorandco.vercel.app/webhook/plaid";
+    return "https://api.app.connorco.dev/webhook/plaid";
   }
 
   async getHealthCheck() {

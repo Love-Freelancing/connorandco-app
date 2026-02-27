@@ -37,7 +37,7 @@
     },
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkwNzNERjA3NzVBNDM3QkMKUldTOE42UjFCOTl6a0IrZW1EcEhhRHlUZ0Z2YW5sT0N4aVdQVE5aOEVTem9GTE1QRzJPM2JaUmMK",
-      "endpoints": ["https://api.connorandco.vercel.app/desktop/update"],
+      "endpoints": ["https://api.app.connorco.dev/desktop/update"],
       "createUpdaterArtifacts": true,
       "dangerousInsecureTransportProtocol": true
     }

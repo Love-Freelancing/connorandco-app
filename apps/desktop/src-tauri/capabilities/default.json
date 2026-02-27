@@ -43,8 +43,8 @@
   "remote": {
     "urls": [
       "http://localhost:3001/**",
-      "https://beta.connorandco.vercel.app/**",
-      "https://app.connorandco.vercel.app/**"
+      "https://beta.app.connorco.dev/**",
+      "https://app.app.connorco.dev/**"
     ]
   },
   "platforms": ["macOS"]

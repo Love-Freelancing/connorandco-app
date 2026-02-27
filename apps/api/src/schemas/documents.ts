@@ -140,7 +140,7 @@ export const preSignedUrlResponseSchema = z.object({
     description:
       "Pre-signed URL for accessing the document, valid for 60 seconds",
     example:
-      "https://service.connorandco.vercel.app/storage/v1/object/sign/vault/documents/2024/invoice.pdf?token=abc123&expires=1640995200",
+      "https://service.app.connorco.dev/storage/v1/object/sign/vault/documents/2024/invoice.pdf?token=abc123&expires=1640995200",
   }),
   expiresAt: z.string().datetime().openapi({
     description: "ISO 8601 timestamp when the URL expires",

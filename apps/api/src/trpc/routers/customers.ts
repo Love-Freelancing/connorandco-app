@@ -633,7 +633,7 @@ export const customersRouter = createTRPCRouter({
             const customerName = customer?.name?.trim() || "there";
 
             resend.emails.send({
-              from: "Connor & Co <connor@connorandco.vercel.app>",
+              from: "Connor & Co <connor@app.connorco.dev>",
               to: customerEmail,
               subject: `Welcome to ${teamName}`,
               html: `<div style="font-family:Inter,Arial,sans-serif;color:#0f172a;line-height:1.6;background:#f8fafc;padding:28px 16px;">
@@ -823,7 +823,7 @@ export const customersRouter = createTRPCRouter({
         }),
       );
       await resend.emails.send({
-        from: "Connor & Co <connor@connorandco.vercel.app>",
+        from: "Connor & Co <connor@app.connorco.dev>",
         to: providedEmail,
         subject: `Sign in to ${customer.team.name ?? "Connor & Co"} portal`,
         html,

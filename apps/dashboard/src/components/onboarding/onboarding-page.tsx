@@ -49,7 +49,7 @@ function DashboardImageAnimation() {
       style={{ width: "100%", height: "100%", transformOrigin: "center" }}
     >
       <Image
-        src="https://cdn.connorandco.vercel.app/web/dashboard-light.svg"
+        src="https://cdn.app.connorco.dev/web/dashboard-light.svg"
         alt="Dashboard illustration"
         width={2400}
         height={1800}
@@ -58,7 +58,7 @@ function DashboardImageAnimation() {
         priority
       />
       <Image
-        src="https://cdn.connorandco.vercel.app/web/dashboard-dark.svg"
+        src="https://cdn.app.connorco.dev/web/dashboard-dark.svg"
         alt="Dashboard illustration"
         width={2400}
         height={1800}

@@ -24,7 +24,7 @@ export default async function Image({ params }: Props) {
   }
 
   const hedvigSansFont = fetch(
-    "https://cdn.connorandco.vercel.app/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
+    "https://cdn.app.connorco.dev/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
   ).then((res) => res.arrayBuffer());
 
   const logoUrl = getWebsiteLogo(invoice.customer?.website);

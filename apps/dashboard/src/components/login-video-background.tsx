@@ -51,7 +51,7 @@ export function LoginVideoBackground() {
         }}
       >
         <img
-          src="https://connorandco.vercel.app/cdn-cgi/image/width=1000,quality=80,format=auto/https://cdn.connorandco.vercel.app/video-poster-v2.jpg"
+          src="https://app.connorco.dev/cdn-cgi/image/width=1000,quality=80,format=auto/https://cdn.app.connorco.dev/video-poster-v2.jpg"
           alt=""
           className="w-full h-full object-cover"
           aria-hidden="true"
@@ -69,10 +69,10 @@ export function LoginVideoBackground() {
         muted
         playsInline
         preload="auto"
-        poster="https://connorandco.vercel.app/cdn-cgi/image/width=1000,quality=80,format=auto/https://cdn.connorandco.vercel.app/video-poster-v2.jpg"
+        poster="https://app.connorco.dev/cdn-cgi/image/width=1000,quality=80,format=auto/https://cdn.app.connorco.dev/video-poster-v2.jpg"
       >
         <source
-          src="https://cdn.connorandco.vercel.app/videos/login-video.mp4"
+          src="https://cdn.app.connorco.dev/videos/login-video.mp4"
           type="video/mp4"
         />
       </video>

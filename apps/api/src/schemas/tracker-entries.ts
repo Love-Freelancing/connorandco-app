@@ -185,7 +185,7 @@ export const trackerEntryResponseSchema = z.object({
       }),
       avatarUrl: z.string().openapi({
         description: "URL to the user's avatar image",
-        example: "https://cdn.connorandco.vercel.app/avatar.jpg",
+        example: "https://cdn.app.connorco.dev/avatar.jpg",
       }),
     })
     .openapi({

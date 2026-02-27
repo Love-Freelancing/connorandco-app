@@ -115,8 +115,8 @@ app.doc("/openapi", {
       "Connor & Co is a platform for Invoicing, Time tracking, File reconciliation, Storage, Financial Overview & your own Assistant.",
     contact: {
       name: "Connor & Co Support",
-      email: "engineer@connorandco.vercel.app",
-      url: "https://connorandco.vercel.app",
+      email: "engineer@app.connorco.dev",
+      url: "https://app.connorco.dev",
     },
     license: {
       name: "AGPL-3.0 license",
@@ -125,7 +125,7 @@ app.doc("/openapi", {
   },
   servers: [
     {
-      url: "https://api.connorandco.vercel.app",
+      url: "https://api.app.connorco.dev",
       description: "Production API",
     },
   ],

@@ -63,7 +63,7 @@ export const invoicePaymentsRouter = createTRPCRouter({
     }
 
     // Return the REST endpoint URL that handles the OAuth flow
-    const apiUrl = process.env.CONNORCO_API_URL || "https://api.connorandco.vercel.app";
+    const apiUrl = process.env.CONNORCO_API_URL || "https://api.app.connorco.dev";
     return `${apiUrl}/invoice-payments/connect-stripe`;
   }),
 

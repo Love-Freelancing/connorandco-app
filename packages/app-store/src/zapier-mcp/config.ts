@@ -21,5 +21,5 @@ export default {
 2. Use your Connor & Co API key for authentication
 3. Create Zaps using Connor & Co's 50+ tools`,
   images: [],
-  installUrl: "https://connorandco.vercel.app/mcp/zapier",
+  installUrl: "https://app.connorco.dev/mcp/zapier",
 };

@@ -21,5 +21,5 @@ export default {
 2. Add Connor & Co as an MCP server in Raycast
 3. @-mention Connor & Co in Raycast AI`,
   images: [],
-  installUrl: "https://connorandco.vercel.app/mcp/raycast",
+  installUrl: "https://app.connorco.dev/mcp/raycast",
 };

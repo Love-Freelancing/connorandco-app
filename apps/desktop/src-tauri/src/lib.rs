@@ -350,12 +350,12 @@ fn get_app_url() -> String {
             url
         },
         "staging" => {
-            let url = "https://beta.connorandco.vercel.app".to_string();
+            let url = "https://beta.app.connorco.dev".to_string();
             println!("🌍 Using staging URL: {}", url);
             url
         },
         "production" | "prod" => {
-            let url = "https://app.connorandco.vercel.app".to_string();
+            let url = "https://app.app.connorco.dev".to_string();
             println!("🌍 Using production URL: {}", url);
             url
         },

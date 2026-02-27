@@ -47,49 +47,49 @@ export function Footer() {
           </Text>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/bOp4NOx"
+            href="https://go.app.connorco.dev/bOp4NOx"
             style={{ color: lightStyles.mutedText.color }}
           >
             Overview
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/VFcNsmQ"
+            href="https://go.app.connorco.dev/VFcNsmQ"
             style={{ color: lightStyles.mutedText.color }}
           >
             Inbox
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/uA06kWO"
+            href="https://go.app.connorco.dev/uA06kWO"
             style={{ color: lightStyles.mutedText.color }}
           >
             Vault
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/x7Fow9L"
+            href="https://go.app.connorco.dev/x7Fow9L"
             style={{ color: lightStyles.mutedText.color }}
           >
             Tracker
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/fkYXc95"
+            href="https://go.app.connorco.dev/fkYXc95"
             style={{ color: lightStyles.mutedText.color }}
           >
             Invoice
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/dEnP9h5"
+            href="https://go.app.connorco.dev/dEnP9h5"
             style={{ color: lightStyles.mutedText.color }}
           >
             Pricing
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://connorandco.vercel.app/download"
+            href="https://app.connorco.dev/download"
             style={{ color: lightStyles.mutedText.color }}
           >
             Download
@@ -107,28 +107,28 @@ export function Footer() {
           </Text>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/fhEy5CL"
+            href="https://go.app.connorco.dev/fhEy5CL"
             style={{ color: lightStyles.mutedText.color }}
           >
             Homepage
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/rofdWKi"
+            href="https://go.app.connorco.dev/rofdWKi"
             style={{ color: lightStyles.mutedText.color }}
           >
             Terms of service
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/TJIL5mQ"
+            href="https://go.app.connorco.dev/TJIL5mQ"
             style={{ color: lightStyles.mutedText.color }}
           >
             Privacy policy
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/IQ1kcN0"
+            href="https://go.app.connorco.dev/IQ1kcN0"
             style={{ color: lightStyles.mutedText.color }}
           >
             Branding
@@ -144,28 +144,28 @@ export function Footer() {
           </Text>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/186swoH"
+            href="https://go.app.connorco.dev/186swoH"
             style={{ color: lightStyles.mutedText.color }}
           >
             Story
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/QWyX8Um"
+            href="https://go.app.connorco.dev/QWyX8Um"
             style={{ color: lightStyles.mutedText.color }}
           >
             Updates
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/Dd7M8cl"
+            href="https://go.app.connorco.dev/Dd7M8cl"
             style={{ color: lightStyles.mutedText.color }}
           >
             Open startup
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.connorandco.vercel.app/M2Hv420"
+            href="https://go.app.connorco.dev/M2Hv420"
             style={{ color: lightStyles.mutedText.color }}
           >
             OSS Friends
@@ -178,7 +178,7 @@ export function Footer() {
 
       <Row>
         <Column className="align-middle w-[40px]">
-          <Link href="https://go.connorandco.vercel.app/lS72Toq">
+          <Link href="https://go.app.connorco.dev/lS72Toq">
             <Img
               src={`${baseUrl}/email/x.png`}
               width="18"
@@ -188,7 +188,7 @@ export function Footer() {
           </Link>
         </Column>
         <Column className="align-middle w-[40px]">
-          <Link href="https://go.connorandco.vercel.app/7rhA3rz">
+          <Link href="https://go.app.connorco.dev/7rhA3rz">
             <Img
               src={`${baseUrl}/email/producthunt.png`}
               width="22"
@@ -198,7 +198,7 @@ export function Footer() {
           </Link>
         </Column>
         <Column className="align-middle">
-          <Link href="https://go.connorandco.vercel.app/Ct3xybK">
+          <Link href="https://go.app.connorco.dev/Ct3xybK">
             <Img
               src={`${baseUrl}/email/linkedin.png`}
               width="22"
@@ -221,7 +221,7 @@ export function Footer() {
 
       <Link
         className={`text-[14px] block ${themeClasses.mutedLink}`}
-        href="https://app.connorandco.vercel.app/settings/notifications"
+        href="https://app.app.connorco.dev/settings/notifications"
         title="Unsubscribe"
         style={{ color: lightStyles.mutedText.color }}
       >

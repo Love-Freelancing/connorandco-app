@@ -34,7 +34,7 @@ export const invoiceReminderSent: NotificationHandler = {
       subject: t("invoice.reminder.subject", {
         invoiceNumber: data.invoiceNumber,
       }),
-      from: `${team.name} <connor@connorandco.vercel.app>`,
+      from: `${team.name} <connor@app.connorco.dev>`,
       data: {
         companyName: data.customerName,
         teamName: team.name,

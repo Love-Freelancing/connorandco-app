@@ -232,7 +232,7 @@ export function EmailPreview() {
             <div className="flex items-start gap-3">
               <div className="size-10 rounded-full bg-white dark:bg-[#1a1a1a] border border-border flex items-center justify-center flex-shrink-0">
                 <img
-                  src="https://connorandco.vercel.app/email/logo.png"
+                  src="https://app.connorco.dev/email/logo.png"
                   alt="Connor & Co"
                   className="size-6 dark:invert dark:brightness-100"
                 />
@@ -262,7 +262,7 @@ export function EmailPreview() {
                   />
                 ) : (
                   <img
-                    src="https://connorandco.vercel.app/email/logo.png"
+                    src="https://app.connorco.dev/email/logo.png"
                     alt="Connor & Co"
                     className="h-10 w-10 dark:invert dark:brightness-100"
                   />

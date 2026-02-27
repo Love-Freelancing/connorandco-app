@@ -21,5 +21,5 @@ export default {
 2. Add Connor & Co as an MCP server with your API key
 3. Use Connor & Co tools in your Copilot workflows`,
   images: [],
-  installUrl: "https://connorandco.vercel.app/mcp/copilot",
+  installUrl: "https://app.connorco.dev/mcp/copilot",
 };

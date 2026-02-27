@@ -24,7 +24,7 @@ export const transactionsExported: NotificationHandler = {
     replyTo: user.email,
     to: data.accountantEmail ? [data.accountantEmail] : [],
     subject: `Transaction Export from ${team.name}`,
-    from: `${team.name} <connor@connorandco.vercel.app>`,
+    from: `${team.name} <connor@app.connorco.dev>`,
     data: {
       accountantEmail: data.accountantEmail,
       teamName: team.name,

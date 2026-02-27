@@ -30,7 +30,7 @@ export const InvoiceReminderEmail = ({
   companyName = "Customer",
   teamName = "Connor & Co",
   invoiceNumber = "INV-0001",
-  link = "https://app.connorandco.vercel.app/i/1234567890",
+  link = "https://app.app.connorco.dev/i/1234567890",
   amount,
   currency,
   dueDate,

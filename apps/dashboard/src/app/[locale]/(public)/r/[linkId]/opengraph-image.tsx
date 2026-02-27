@@ -33,11 +33,11 @@ export default async function Image({ params }: Props) {
   }
 
   const hedvigSerifFont = fetch(
-    "https://cdn.connorandco.vercel.app/fonts/HedvigSerif/HedvigLettersSerif-Regular.ttf?c=1",
+    "https://cdn.app.connorco.dev/fonts/HedvigSerif/HedvigLettersSerif-Regular.ttf?c=1",
   ).then((res) => res.arrayBuffer());
 
   const hedvigSansFont = fetch(
-    "https://cdn.connorandco.vercel.app/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
+    "https://cdn.app.connorco.dev/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
   ).then((res) => res.arrayBuffer());
 
   const chartName = getChartDisplayName(report.type as any);

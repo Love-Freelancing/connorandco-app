@@ -42,7 +42,7 @@ export const onboardTeam = schemaTask({
     await resend.emails.send({
       to: user.email,
       subject: "Welcome to Connor & Co",
-      from: "Pontus from Connor & Co <pontus@connorandco.vercel.app>",
+      from: "Pontus from Connor & Co <pontus@app.connorco.dev>",
       html: await render(
         WelcomeEmail({
           fullName: user.full_name,
@@ -59,7 +59,7 @@ export const onboardTeam = schemaTask({
 
     if (await shouldSendEmail(user.team_id)) {
       await resend.emails.send({
-        from: "Pontus from Connor & Co <pontus@connorandco.vercel.app>",
+        from: "Pontus from Connor & Co <pontus@app.connorco.dev>",
         to: user.email,
         subject: "Your trial is expiring soon",
         html: await render(
@@ -74,7 +74,7 @@ export const onboardTeam = schemaTask({
 
     if (await shouldSendEmail(user.team_id)) {
       await resend.emails.send({
-        from: "Pontus from Connor & Co <pontus@connorandco.vercel.app>",
+        from: "Pontus from Connor & Co <pontus@app.connorco.dev>",
         to: user.email,
         subject: "Your trial has ended",
         html: await render(TrialEndedEmail({ fullName: user.full_name })),

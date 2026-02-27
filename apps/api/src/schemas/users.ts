@@ -13,14 +13,14 @@ export const updateUserSchema = z.object({
   avatarUrl: z
     .string()
     .url()
-    .refine((url) => url.includes("connorandco.vercel.app"), {
-      message: "avatarUrl must be a connorandco.vercel.app domain URL",
+    .refine((url) => url.includes("app.connorco.dev"), {
+      message: "avatarUrl must be a app.connorco.dev domain URL",
     })
     .optional()
     .openapi({
       description:
-        "URL to the user's avatar image. Must be hosted on connorandco.vercel.app domain",
-      example: "https://cdn.connorandco.vercel.app/avatars/jane-doe.jpg",
+        "URL to the user's avatar image. Must be hosted on app.connorco.dev domain",
+      example: "https://cdn.app.connorco.dev/avatars/jane-doe.jpg",
     }),
   locale: z.string().optional().openapi({
     description:
@@ -84,7 +84,7 @@ export const userSchema = z.object({
   }),
   avatarUrl: z.string().url().nullable().openapi({
     description: "URL to the user's avatar image",
-    example: "https://cdn.connorandco.vercel.app/avatars/jane-doe.jpg",
+    example: "https://cdn.app.connorco.dev/avatars/jane-doe.jpg",
   }),
   locale: z.string().nullable().openapi({
     description:
@@ -141,7 +141,7 @@ export const userSchema = z.object({
       }),
       logoUrl: z.string().url().openapi({
         description: "URL to the team's logo image",
-        example: "https://cdn.connorandco.vercel.app/logos/acme-corp.png",
+        example: "https://cdn.app.connorco.dev/logos/acme-corp.png",
       }),
       plan: z.string().openapi({
         description: "Current subscription plan of the team",

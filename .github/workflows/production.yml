@@ -267,7 +267,7 @@ jobs:
       - name: Deploy
         run: |
           bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
-          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $(cat domain.txt) connorandco.vercel.app
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $(cat domain.txt) app.connorco.dev
 
   # ---------------------------------------------------------------------------
   # Deploy Email to Vercel
@@ -301,7 +301,7 @@ jobs:
       - name: Deploy
         run: |
           bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
-          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $(cat domain.txt) email.connorandco.vercel.app
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $(cat domain.txt) email.app.connorco.dev
 
   # ---------------------------------------------------------------------------
   # Deploy Jobs to Trigger.dev

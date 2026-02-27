@@ -79,7 +79,7 @@ export async function sendSlackTransactionNotifications({
                 type: "plain_text",
                 text: "View transactions",
               },
-              url: "https://app.connorandco.vercel.app/transactions",
+              url: "https://app.app.connorco.dev/transactions",
               action_id: "button_click",
             },
           ],

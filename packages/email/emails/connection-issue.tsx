@@ -78,7 +78,7 @@ export const ConnectionIssueEmail = ({
           </Text>
 
           <Section className="text-center mt-[50px] mb-[50px]">
-            <Button href="https://go.connorandco.vercel.app/34Xt7XK">Reconnect</Button>
+            <Button href="https://go.app.connorco.dev/34Xt7XK">Reconnect</Button>
           </Section>
 
           <Text

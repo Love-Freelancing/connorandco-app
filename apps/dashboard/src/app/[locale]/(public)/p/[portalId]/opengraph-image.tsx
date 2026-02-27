@@ -25,7 +25,7 @@ export default async function Image({ params }: Props) {
   const { customer, summary } = data;
 
   const hedvigSansFont = fetch(
-    "https://cdn.connorandco.vercel.app/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
+    "https://cdn.app.connorco.dev/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
   ).then((res) => res.arrayBuffer());
 
   return new ImageResponse(
