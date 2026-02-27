@@ -356,6 +356,34 @@ export function PortalContent({ portalId }: Props) {
   useEffect(() => {
     let isMounted = true;
 
+    const consumeHashSession = async () => {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      const hash = window.location.hash;
+      if (!hash || !hash.includes("access_token=") || !hash.includes("refresh_token=")) {
+        return;
+      }
+
+      const params = new URLSearchParams(hash.replace(/^#/, ""));
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+
+      if (!accessToken || !refreshToken) {
+        return;
+      }
+
+      const { error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+      if (!error) {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+    };
+
     const restoreSession = async (email: string | null) => {
       if (!isMounted) return;
 
@@ -385,6 +413,8 @@ export function PortalContent({ portalId }: Props) {
     };
 
     const hydrate = async () => {
+      await consumeHashSession();
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
