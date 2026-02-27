@@ -118,7 +118,15 @@ const CUSTOMER_OFFER_CATALOG: Record<
 };
 
 function normalizeEmail(email: string) {
-  return email.trim().toLowerCase();
+  const trimmed = email.trim();
+
+  const angleMatch = trimmed.match(/<([^>]+)>/);
+  const extracted = angleMatch?.[1] ?? trimmed;
+
+  return extracted
+    .normalize("NFKC")
+    .replace(/\s+/g, "")
+    .toLowerCase();
 }
 
 function sanitizePortalFileName(fileName: string) {
