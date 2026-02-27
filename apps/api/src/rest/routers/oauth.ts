@@ -293,7 +293,7 @@ app.openapi(
           );
 
           await resend.emails.send({
-            from: "Connor & Co <connor@app.connorco.dev>",
+            from: "Connor & Co <connor@connorco.dev>",
             to: session.user.email,
             subject: "An app has been added to your team",
             html,
