@@ -828,6 +828,25 @@ export const customersRouter = createTRPCRouter({
         actionLink,
       });
 
+      const persistedCode = await portalLoginCodeCache.get(
+        input.portalId,
+        providedEmail,
+      );
+
+      if (!persistedCode || persistedCode.code !== code) {
+        logger.error("customers.sendPortalLoginLink failed to persist code", {
+          customerId: customer.id,
+          teamId: customer.teamId,
+          portalId: input.portalId,
+        });
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Sign-in codes are temporarily unavailable. Please try again.",
+        });
+      }
+
       const html = await render(
         PortalLoginLinkEmail({
           email: providedEmail,
@@ -876,7 +895,7 @@ export const customersRouter = createTRPCRouter({
 
       if (!cached || cached.code !== input.code) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
+          code: "BAD_REQUEST",
           message: "Invalid or expired verification code",
         });
       }
