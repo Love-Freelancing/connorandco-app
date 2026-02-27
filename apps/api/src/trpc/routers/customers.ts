@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import {
   createCustomerPortalMessageSchema,
   createCustomerSubscriptionCheckoutSchema,
@@ -23,7 +23,6 @@ import {
   toggleCustomerPortalSchema,
   updateCustomerPortalRequestSchema,
   upsertCustomerSchema,
-  verifyPortalLoginCodeSchema,
   verifyPortalAccessSchema,
 } from "@api/schemas/customers";
 import { resend } from "@api/services/resend";
@@ -54,8 +53,6 @@ import {
   updateCustomerEnrichmentStatus,
   upsertCustomer,
 } from "@connorco/db/queries";
-import { PortalLoginLinkEmail } from "@connorco/email/emails/portal-login-link";
-import { render } from "@connorco/email/render";
 import { triggerJob } from "@connorco/job-client";
 import { createLoggerWithContext } from "@connorco/logger";
 import { signedUrl } from "@connorco/supabase/storage";
@@ -128,106 +125,6 @@ function normalizeEmail(email: string) {
     .normalize("NFKC")
     .replace(/\s+/g, "")
     .toLowerCase();
-}
-
-type PortalCodeTokenPayload = {
-  portalId: string;
-  email: string;
-  code: string;
-  actionLink: string;
-  expiresAt: number;
-};
-
-function toBase64Url(input: string) {
-  return Buffer.from(input)
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
-}
-
-function fromBase64Url(input: string) {
-  const base64 = input.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = `${base64}${"=".repeat((4 - (base64.length % 4)) % 4)}`;
-  return Buffer.from(padded, "base64").toString("utf8");
-}
-
-function getPortalCodeSecret() {
-  return (
-    process.env.PORTAL_AUTH_CODE_SECRET ||
-    process.env.FILE_KEY_SECRET ||
-    process.env.WEBHOOK_SECRET_KEY
-  );
-}
-
-function signPortalCodeToken(payload: PortalCodeTokenPayload) {
-  const secret = getPortalCodeSecret();
-
-  if (!secret) {
-    throw new Error("Missing portal auth code signing secret");
-  }
-
-  const encodedPayload = toBase64Url(JSON.stringify(payload));
-  const signature = createHmac("sha256", secret)
-    .update(encodedPayload)
-    .digest("base64url");
-
-  return `${encodedPayload}.${signature}`;
-}
-
-function verifyPortalCodeToken(token: string): PortalCodeTokenPayload | null {
-  const secret = getPortalCodeSecret();
-
-  if (!secret) {
-    return null;
-  }
-
-  const [encodedPayload, signature] = token.split(".");
-
-  if (!encodedPayload || !signature) {
-    return null;
-  }
-
-  const expectedSignature = createHmac("sha256", secret)
-    .update(encodedPayload)
-    .digest("base64url");
-
-  try {
-    const validSignature = timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature),
-    );
-
-    if (!validSignature) {
-      return null;
-    }
-  } catch {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(
-      fromBase64Url(encodedPayload),
-    ) as PortalCodeTokenPayload;
-
-    if (
-      !parsed?.portalId ||
-      !parsed?.email ||
-      !parsed?.code ||
-      !parsed?.actionLink ||
-      !parsed?.expiresAt
-    ) {
-      return null;
-    }
-
-    if (parsed.expiresAt < Date.now()) {
-      return null;
-    }
-
-    return parsed;
-  } catch {
-    return null;
-  }
 }
 
 function sanitizePortalFileName(fileName: string) {
@@ -910,10 +807,9 @@ export const customersRouter = createTRPCRouter({
         },
       });
 
-      const emailOtp = data.properties?.email_otp;
       const actionLink = data.properties?.action_link;
 
-      if (error || !emailOtp || !actionLink) {
+      if (error || !actionLink) {
         logger.error("customers.sendPortalLoginLink failed to generate link", {
           customerId: customer.id,
           teamId: customer.teamId,
@@ -922,87 +818,11 @@ export const customersRouter = createTRPCRouter({
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Unable to send sign-in code right now",
+          message: "Unable to sign in right now",
         });
       }
-
-      const html = await render(
-        PortalLoginLinkEmail({
-          email: providedEmail,
-          teamName: customer.team.name ?? "Connor & Co",
-          customerName: customer.name ?? "there",
-          otpCode: emailOtp,
-        }),
-      );
-      await resend.emails.send({
-        from: "Connor & Co <connor@connorco.dev>",
-        to: providedEmail,
-        subject: `Your sign-in code for ${customer.team.name ?? "Connor & Co"}`,
-        html,
-      });
-
-      const verificationToken = signPortalCodeToken({
-        portalId: input.portalId,
-        email: providedEmail,
-        code: emailOtp,
+      return {
         actionLink,
-        expiresAt: Date.now() + 15 * 60 * 1000,
-      });
-
-      return {
-        sent: true,
-        verificationToken,
-      };
-    }),
-
-  verifyPortalLoginCode: publicProcedure
-    .input(verifyPortalLoginCodeSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
-      const customer = await getCustomerByPortalId(db, {
-        portalId: input.portalId,
-      });
-
-      if (!customer) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Customer portal not found",
-        });
-      }
-
-      const customerEmail = customer.email
-        ? normalizeEmail(customer.email)
-        : "";
-      const providedEmail = normalizeEmail(input.email);
-
-      if (!customerEmail || customerEmail !== providedEmail) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Email does not match the customer email on file",
-        });
-      }
-
-      const tokenPayload = verifyPortalCodeToken(input.verificationToken);
-
-      if (!tokenPayload) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invalid or expired verification code",
-        });
-      }
-
-      if (
-        tokenPayload.portalId !== input.portalId ||
-        normalizeEmail(tokenPayload.email) !== providedEmail ||
-        tokenPayload.code !== input.code
-      ) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invalid or expired verification code",
-        });
-      }
-
-      return {
-        actionLink: tokenPayload.actionLink,
       };
     }),
 

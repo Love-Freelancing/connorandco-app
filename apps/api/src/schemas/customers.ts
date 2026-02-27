@@ -564,25 +564,6 @@ export const sendPortalLoginLinkSchema = z.object({
   }),
 });
 
-export const verifyPortalLoginCodeSchema = z.object({
-  portalId: z.string().openapi({
-    description: "Short ID for the customer portal URL",
-    example: "X7kM9nPq",
-  }),
-  email: z.string().email().openapi({
-    description: "Customer email on file used for portal sign in",
-    example: "contact@acme.com",
-  }),
-  code: z.string().regex(/^\d{8}$/).openapi({
-    description: "8-digit verification code",
-    example: "12345678",
-  }),
-  verificationToken: z.string().min(20).openapi({
-    description: "Signed short-lived verification token returned on code send",
-    example: "eyJwIjoieDdyLi4uIn0.signature",
-  }),
-});
-
 const portalAccessSchema = z.object({
   portalId: z.string().openapi({
     description: "Short ID for the customer portal URL",
