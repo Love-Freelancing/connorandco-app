@@ -32,6 +32,7 @@ import {
   Paperclip,
   Plus,
   Sun,
+  Trash2,
   X,
 } from "lucide-react";
 import Image from "next/image";
@@ -1899,19 +1900,21 @@ export function PortalContent({ portalId }: Props) {
                 {selectedRequest ? (
                   <>
                     <DialogHeader>
-                      <DialogTitle className="text-xl tracking-tight text-foreground">
-                        {selectedRequest.title}
-                      </DialogTitle>
-                      <div className="pt-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <DialogTitle className="text-xl tracking-tight text-foreground">
+                          {selectedRequest.title}
+                        </DialogTitle>
                         <Button
-                          variant="destructive"
+                          variant="ghost"
                           size="sm"
+                          className="h-8 rounded-full px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
                           onClick={() => void handleDeletePortalRequest(selectedRequest.id)}
                           disabled={deletePortalRequestMutation.isPending}
                         >
+                          <Trash2 size={14} className="mr-1" />
                           {deletePortalRequestMutation.isPending
                             ? "Deleting..."
-                            : "Delete request"}
+                            : "Delete"}
                         </Button>
                       </div>
                     </DialogHeader>
