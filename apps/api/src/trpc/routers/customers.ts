@@ -5,7 +5,9 @@ import {
   createPortalAttachmentUploadSchema,
   createPortalMessageSchema,
   createPortalRequestSchema,
+  deleteCustomerPortalRequestSchema,
   deleteCustomerSchema,
+  deletePortalRequestSchema,
   enrichCustomerSchema,
   getCustomerByIdSchema,
   getCustomerByPortalIdSchema,
@@ -38,6 +40,7 @@ import {
   clearCustomerEnrichment,
   createClientPortalMessage,
   createClientRequest,
+  deleteClientRequest,
   deleteCustomer,
   getClientPortalMessages,
   getClientRequests,
@@ -1128,6 +1131,27 @@ export const customersRouter = createTRPCRouter({
       };
     }),
 
+  deletePortalRequest: publicProcedure
+    .input(deletePortalRequestSchema)
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      const customer = await requirePortalAccess(db, input, session);
+
+      const deleted = await deleteClientRequest(db, {
+        teamId: customer.teamId,
+        customerId: customer.id,
+        requestId: input.requestId,
+      });
+
+      if (!deleted) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Request not found",
+        });
+      }
+
+      return deleted;
+    }),
+
   getPortalAssets: publicProcedure
     .input(getPortalAssetsSchema)
     .query(async ({ ctx: { db, session, supabase }, input }) => {
@@ -1309,5 +1333,24 @@ export const customersRouter = createTRPCRouter({
 
         throw error;
       }
+    }),
+
+  deleteCustomerPortalRequest: protectedProcedure
+    .input(deleteCustomerPortalRequestSchema)
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      const deleted = await deleteClientRequest(db, {
+        teamId: teamId!,
+        customerId: input.customerId,
+        requestId: input.requestId,
+      });
+
+      if (!deleted) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Request not found",
+        });
+      }
+
+      return deleted;
     }),
 });

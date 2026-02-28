@@ -167,6 +167,9 @@ export function CustomerPortalRequestsManager({
     sourceStatus: RequestStatus;
     targetStatus: RequestStatus;
   } | null>(null);
+  const [pendingDeleteRequestId, setPendingDeleteRequestId] = useState<
+    string | null
+  >(null);
 
   const { data: requestsData } = useQuery(
     trpc.customers.getCustomerPortalRequests.queryOptions({ customerId }),
@@ -234,6 +237,34 @@ export function CustomerPortalRequestsManager({
       },
       onSettled: () => {
         setUpdatingKey(null);
+      },
+    }),
+  );
+
+  const deleteRequestMutation = useMutation(
+    trpc.customers.deleteCustomerPortalRequest.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: trpc.customers.getCustomerPortalRequests.queryKey({
+            customerId,
+          }),
+        });
+
+        setPendingDeleteRequestId(null);
+        setSelectedRequestId(null);
+
+        toast({
+          title: "Request deleted",
+          variant: "success",
+          duration: 2000,
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "error",
+          duration: 3000,
+          title: error.message || "Failed to delete request",
+        });
       },
     }),
   );
@@ -962,6 +993,18 @@ export function CustomerPortalRequestsManager({
                 <DialogTitle className="text-xl tracking-tight text-foreground">
                   {selectedRequest.title}
                 </DialogTitle>
+                <div className="pt-1">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setPendingDeleteRequestId(selectedRequest.id)}
+                    disabled={deleteRequestMutation.isPending}
+                  >
+                    {deleteRequestMutation.isPending
+                      ? "Deleting..."
+                      : "Delete request"}
+                  </Button>
+                </div>
               </DialogHeader>
 
               <div className="space-y-5">
@@ -1122,6 +1165,39 @@ export function CustomerPortalRequestsManager({
               }}
             >
               Confirm move
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={Boolean(pendingDeleteRequestId)}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteRequestId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete request?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingDeleteRequestId
+                ? `This will permanently delete "${kanbanItems[pendingDeleteRequestId]?.title ?? "request"}".`
+                : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (!pendingDeleteRequestId) return;
+
+                deleteRequestMutation.mutate({
+                  customerId,
+                  requestId: pendingDeleteRequestId,
+                });
+              }}
+            >
+              Confirm delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -696,6 +696,14 @@ export const reorderPortalRequestsSchema = z.object({
   }),
 });
 
+export const deletePortalRequestSchema = z.object({
+  ...portalAccessSchema.shape,
+  requestId: z.string().uuid().openapi({
+    description: "Unique identifier of the client request",
+    example: "8b6f4ee8-23c2-4a34-bb46-c53e6561c7d2",
+  }),
+});
+
 export const getPortalAssetsSchema = z.object({
   ...portalAccessSchema.shape,
   pageSize: z.number().min(1).max(50).optional().openapi({
@@ -708,6 +716,17 @@ export const getCustomerPortalRequestsSchema = z.object({
   customerId: z.string().uuid().openapi({
     description: "Unique identifier of the customer",
     example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+  }),
+});
+
+export const deleteCustomerPortalRequestSchema = z.object({
+  customerId: z.string().uuid().openapi({
+    description: "Unique identifier of the customer",
+    example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+  }),
+  requestId: z.string().uuid().openapi({
+    description: "Unique identifier of the client request",
+    example: "8b6f4ee8-23c2-4a34-bb46-c53e6561c7d2",
   }),
 });
 

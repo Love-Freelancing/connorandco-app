@@ -338,6 +338,34 @@ export async function updateClientRequest(
   });
 }
 
+export type DeleteClientRequestParams = {
+  teamId: string;
+  customerId: string;
+  requestId: string;
+};
+
+export async function deleteClientRequest(
+  db: Database,
+  params: DeleteClientRequestParams,
+) {
+  const { teamId, customerId, requestId } = params;
+
+  const [deleted] = await db
+    .delete(clientRequests)
+    .where(
+      and(
+        eq(clientRequests.id, requestId),
+        eq(clientRequests.teamId, teamId),
+        eq(clientRequests.customerId, customerId),
+      ),
+    )
+    .returning({
+      id: clientRequests.id,
+    });
+
+  return deleted ?? null;
+}
+
 export type GetClientPortalMessagesParams = {
   teamId: string;
   customerId: string;

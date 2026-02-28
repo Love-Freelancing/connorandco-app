@@ -509,6 +509,23 @@ export function PortalContent({ portalId }: Props) {
     }),
   );
 
+  const deletePortalRequestMutation = useMutation(
+    trpc.customers.deletePortalRequest.mutationOptions({
+      onSuccess: async () => {
+        if (!authInput) return;
+
+        await queryClient.invalidateQueries({
+          queryKey: trpc.customers.getPortalRequests.queryKey(authInput),
+        });
+
+        setSelectedRequestId(null);
+      },
+      onError: (error) => {
+        setAuthError(error.message || "Unable to delete request");
+      },
+    }),
+  );
+
   const getPortalManageSubscriptionUrlMutation = useMutation(
     trpc.customers.getPortalManageSubscriptionUrl.mutationOptions(),
   );
@@ -758,6 +775,27 @@ export function PortalContent({ portalId }: Props) {
     setTimeout(() => {
       setDownloadingId(null);
     }, 1000);
+  };
+
+  const handleDeletePortalRequest = async (requestId: string) => {
+    if (!authInput || deletePortalRequestMutation.isPending) {
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      "Delete this request? This action cannot be undone.",
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setAuthError(null);
+
+    await deletePortalRequestMutation.mutateAsync({
+      ...authInput,
+      requestId,
+    });
   };
 
   const subscriptionStatus =
@@ -1864,6 +1902,18 @@ export function PortalContent({ portalId }: Props) {
                       <DialogTitle className="text-xl tracking-tight text-foreground">
                         {selectedRequest.title}
                       </DialogTitle>
+                      <div className="pt-1">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => void handleDeletePortalRequest(selectedRequest.id)}
+                          disabled={deletePortalRequestMutation.isPending}
+                        >
+                          {deletePortalRequestMutation.isPending
+                            ? "Deleting..."
+                            : "Delete request"}
+                        </Button>
+                      </div>
                     </DialogHeader>
 
                     <div className="space-y-5">
